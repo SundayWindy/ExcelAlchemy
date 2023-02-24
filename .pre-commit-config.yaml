@@ -1,0 +1,67 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: double-quote-string-fixer
+      - id: fix-byte-order-marker
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/MarcoGorelli/absolufy-imports
+    rev: v0.3.1
+    hooks:
+      - id: absolufy-imports
+
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        args:
+          - .
+        types: [python]
+        language: system
+        pass_filenames: false
+
+  - repo: https://github.com/ambv/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+
+  - repo: local
+    hooks:
+      - id: mypy-excelalchemy
+        name: mypy-excelalchemy
+        entry: mypy
+        args:
+          - excelalchemy
+        pass_filenames: false
+        language: system
+
+
+  - repo: local
+    hooks:
+      - id: pyright-excelalchemy
+        name: pyright-excelalchemy
+        entry: pyright
+        args:
+          - excelalchemy
+        language: node
+        pass_filenames: false
+        additional_dependencies: ["pyright@1.1.237"]
+
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        pass_filenames: false
+        args:
+          - excelalchemy

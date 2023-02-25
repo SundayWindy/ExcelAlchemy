@@ -8,16 +8,16 @@ from pydantic import BaseModel
 
 from excelalchemy import ExcelAlchemy
 from excelalchemy import Key
+from excelalchemy import Option
 from excelalchemy import OptionId
 from excelalchemy.helper.pydantic import extract_pydantic_model
-from excelalchemy.model.abstract import FieldMeta
-from excelalchemy.model.abstract import Option
-from excelalchemy.model.excel import ExcelExporterConfig
-from excelalchemy.model.excel import ExcelImporterConfig
-from excelalchemy.model.excel import ImportMode
-from excelalchemy.model.value_type.number import Number
-from excelalchemy.model.value_type.number_range import NumberRange
-from excelalchemy.model.value_type.string import String
+from excelalchemy.types.alchemy import ExcelExporterConfig
+from excelalchemy.types.alchemy import ExcelImporterConfig
+from excelalchemy.types.alchemy import ImportMode
+from excelalchemy.types.column.field import FieldMeta
+from excelalchemy.types.value.number import Number
+from excelalchemy.types.value.number_range import NumberRange
+from excelalchemy.types.value.string import String
 
 
 class ThingCreateSuccessImporter(BaseModel):

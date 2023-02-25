@@ -3,7 +3,6 @@
 ## 1. 项目介绍
 
 * ExcelAlchemy 负责从 Excel 解析用户的输入，转换、生成对应的数据结构，给后端使用。
-* ExcelAlchemy 负责将数据验证的
 * ExcelAlchemy 负责将后端给定的数据，转换、生成对应的 Excel，给用户下载。
 
 ## 2. 核心设计

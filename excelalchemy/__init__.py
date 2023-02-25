@@ -1,59 +1,55 @@
-"""ExcelAlchemy, a Python library for reading and writing Excel files."""
+"""A Python Library for Reading and Writing Excel Files"""
 
-__version__ = '0.1a2'
+__version__ = '0.1.0a3'
 
-from excelalchemy.alchemy import ExcelAlchemy
-from excelalchemy.exception import ExcelCellError
-from excelalchemy.exception import ProgrammaticError
-from excelalchemy.model.abstract import CharacterSet
-from excelalchemy.model.abstract import DataRangeOption
-from excelalchemy.model.abstract import DateFormat
-from excelalchemy.model.abstract import FieldMeta
-from excelalchemy.model.abstract import Option
-from excelalchemy.model.abstract import PatchFieldMeta
-from excelalchemy.model.excel import ExcelExporterConfig
-from excelalchemy.model.excel import ExcelImporterConfig
-from excelalchemy.model.excel import ImportMode
-from excelalchemy.model.identity import ColumnIndex
-from excelalchemy.model.identity import Key
-from excelalchemy.model.identity import Label
-from excelalchemy.model.identity import OptionId
-from excelalchemy.model.identity import RowIndex
-from excelalchemy.model.identity import UniqueKey
-from excelalchemy.model.identity import UniqueLabel
-from excelalchemy.model.result import ImportDataResult
-from excelalchemy.model.result import ImportExcelResult
-from excelalchemy.model.result import ImportRowResult
-from excelalchemy.model.result import ValidateHeaderResult
-from excelalchemy.model.value_type.boolean import Boolean
-from excelalchemy.model.value_type.date import Date
-from excelalchemy.model.value_type.date_range import DateRange
-from excelalchemy.model.value_type.email import Email
-from excelalchemy.model.value_type.money import Money
-from excelalchemy.model.value_type.multi_checkbox import MultiCheckbox
-from excelalchemy.model.value_type.number import Number
-from excelalchemy.model.value_type.number_range import NumberRange
-from excelalchemy.model.value_type.organization import MultiOrganization
-from excelalchemy.model.value_type.organization import SingleOrganization
-from excelalchemy.model.value_type.phone_number import PhoneNumber
-from excelalchemy.model.value_type.radio import Radio
-from excelalchemy.model.value_type.staff import MultiStaff
-from excelalchemy.model.value_type.staff import SingleStaff
-from excelalchemy.model.value_type.string import String
-from excelalchemy.model.value_type.tree import MultiTreeNode
-from excelalchemy.model.value_type.tree import SingleTreeNode
-from excelalchemy.model.value_type.url import Url
-from excelalchemy.util import flatten
+from excelalchemy.const import CharacterSet
+from excelalchemy.const import DataRangeOption
+from excelalchemy.const import DateFormat
+from excelalchemy.const import Option
+from excelalchemy.core.alchemy import ExcelAlchemy
+from excelalchemy.exc import ExcelCellError
+from excelalchemy.exc import ProgrammaticError
+from excelalchemy.types.alchemy import ExcelExporterConfig
+from excelalchemy.types.alchemy import ExcelImporterConfig
+from excelalchemy.types.alchemy import ImportMode
+from excelalchemy.types.column.field import FieldMeta
+from excelalchemy.types.column.field import PatchFieldMeta
+from excelalchemy.types.identity import ColumnIndex
+from excelalchemy.types.identity import Key
+from excelalchemy.types.identity import Label
+from excelalchemy.types.identity import OptionId
+from excelalchemy.types.identity import RowIndex
+from excelalchemy.types.identity import UniqueKey
+from excelalchemy.types.identity import UniqueLabel
+from excelalchemy.types.result import ImportResult
+from excelalchemy.types.result import ValidateHeaderResult
+from excelalchemy.types.result import ValidateResult
+from excelalchemy.types.result import ValidateRowResult
+from excelalchemy.types.value.boolean import Boolean
+from excelalchemy.types.value.date import Date
+from excelalchemy.types.value.date_range import DateRange
+from excelalchemy.types.value.email import Email
+from excelalchemy.types.value.money import Money
+from excelalchemy.types.value.multi_checkbox import MultiCheckbox
+from excelalchemy.types.value.number import Number
+from excelalchemy.types.value.number_range import NumberRange
+from excelalchemy.types.value.organization import MultiOrganization
+from excelalchemy.types.value.organization import SingleOrganization
+from excelalchemy.types.value.phone_number import PhoneNumber
+from excelalchemy.types.value.radio import Radio
+from excelalchemy.types.value.staff import MultiStaff
+from excelalchemy.types.value.staff import SingleStaff
+from excelalchemy.types.value.string import String
+from excelalchemy.types.value.tree import MultiTreeNode
+from excelalchemy.types.value.tree import SingleTreeNode
+from excelalchemy.types.value.url import Url
+from excelalchemy.util.excel import flatten
 
 __all__ = [
     'ExcelAlchemy',
     'ExcelCellError',
     'ProgrammaticError',
-    'CharacterSet',
-    'DataRangeOption',
-    'DateFormat',
     'FieldMeta',
-    'Option',
     'PatchFieldMeta',
     'ExcelExporterConfig',
     'ExcelImporterConfig',
@@ -65,9 +61,9 @@ __all__ = [
     'RowIndex',
     'UniqueKey',
     'UniqueLabel',
-    'ImportDataResult',
-    'ImportExcelResult',
-    'ImportRowResult',
+    'ImportResult',
+    'ValidateResult',
+    'ValidateRowResult',
     'ValidateHeaderResult',
     'Boolean',
     'Date',

@@ -1,5 +1,17 @@
-from excelalchemy.model.identity import Key
-from excelalchemy.model.identity import Label
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Set
+from typing import TypeVar
+from typing import Union
+
+from pydantic import BaseModel
+
+from excelalchemy.types.identity import Key
+from excelalchemy.types.identity import Label
+from excelalchemy.types.identity import OptionId
 
 HEADER_HINT = """
 导入填写须知：
@@ -40,3 +52,73 @@ MILLISECOND_TO_SECOND = 1000
 MAX_OPTIONS_COUNT = 100
 
 DEFAULT_FIELD_META_ORDER = -1
+DictStrAny = Dict[str, Any]
+DictAny = Dict[Any, Any]
+SetStr = Set[str]
+ListStr = List[str]
+IntStr = Union[int, str]
+ExcelConfigT = TypeVar('ExcelConfigT')
+ContextT = TypeVar('ContextT')
+CreateImporterModelT = TypeVar('CreateImporterModelT', bound=BaseModel)
+UpdateImporterModelT = TypeVar('UpdateImporterModelT', bound=BaseModel)
+ExporterModelT = TypeVar('ExporterModelT', bound=BaseModel)
+CreateModelT = TypeVar('CreateModelT', bound=BaseModel)
+UpdateModelT = TypeVar('UpdateModelT', bound=BaseModel)
+
+
+class CharacterSet(str, Enum):
+    CHINESE = 'CHINESE'
+    NUMBER = 'NUMBER'
+    LOWERCASE_LETTERS = 'LOWERCASE_LETTERS'
+    UPPERCASE_LETTERS = 'UPPERCASE_LETTERS'
+    SPECIAL_SYMBOLS = 'SPECIAL_SYMBOLS'
+
+
+class DateFormat(str, Enum):
+    YEAR = 'YEAR'
+    MONTH = 'MONTH'
+    DAY = 'DAY'
+    MINUTE = 'MINUTE'
+
+
+class DataRangeOption(str, Enum):
+    NONE = 'NONE'
+    PRE = 'PRE'
+    NEXT = 'NEXT'
+
+
+DATE_FORMAT_TO_PYTHON_MAPPING = {
+    DateFormat.YEAR: '%Y',
+    DateFormat.MONTH: '%Y-%m',
+    DateFormat.DAY: '%Y-%m-%d',
+    DateFormat.MINUTE: '%Y-%m-%d %H:%M',
+}
+DATE_FORMAT_TO_HINT_MAPPING = {
+    DateFormat.YEAR: 'yyyy',
+    DateFormat.MONTH: 'yyyy/mm',
+    DateFormat.DAY: 'yyyy/mm/dd',
+    DateFormat.MINUTE: 'yyyy/mm/dd hh:mm',
+}
+DATA_RANGE_OPTION_TO_CHINESE = {
+    DataRangeOption.PRE: '早于当前时间',
+    DataRangeOption.NEXT: '晚于当前时间',
+    DataRangeOption.NONE: '无限制',
+}
+
+
+@dataclass
+class Option:
+    # For user's usage, the name is the most important symbol
+    id: OptionId
+    name: str
+
+    def __eq__(self, other: Any) -> bool:
+        # for convenience, use name rather then id
+        if isinstance(other, str):
+            return self.name == other
+        else:
+            return False
+
+    def __hash__(self) -> int:
+        # for convenience, use name rather then id
+        return hash(self.name)

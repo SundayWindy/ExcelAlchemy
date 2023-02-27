@@ -34,8 +34,8 @@ from excelalchemy.types.identity import RowIndex
 from excelalchemy.types.identity import UniqueLabel
 from excelalchemy.types.result import ValidateRowResult
 from excelalchemy.types.value import EXCEL_CHOICE_VALUE_TYPE
-from excelalchemy.util.excel import add_excel_prefix
-from excelalchemy.util.excel import value_is_nan
+from excelalchemy.util.file import add_excel_prefix
+from excelalchemy.util.file import value_is_nan
 
 # pandas 认为 Excel 的第一行是 0, 第一列是 0
 PANDAS_EXCEL_INDEX_START_AT = 0

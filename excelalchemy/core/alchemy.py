@@ -50,10 +50,10 @@ from excelalchemy.types.result import ImportResult
 from excelalchemy.types.result import ValidateHeaderResult
 from excelalchemy.types.result import ValidateResult
 from excelalchemy.types.result import ValidateRowResult
-from excelalchemy.util.excel import flatten
-from excelalchemy.util.excel import read_file_from_minio_object
-from excelalchemy.util.excel import remove_excel_prefix
-from excelalchemy.util.excel import upload_file_from_minio_object
+from excelalchemy.util.file import flatten
+from excelalchemy.util.file import read_file_from_minio_object
+from excelalchemy.util.file import remove_excel_prefix
+from excelalchemy.util.file import upload_file_from_minio_object
 
 HEADER_HINT_LINE_COUNT = 1  # HEADER_HINT 占用的行数
 

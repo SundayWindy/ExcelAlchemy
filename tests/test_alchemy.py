@@ -7,17 +7,17 @@ from minio import Minio
 from pydantic import BaseModel
 
 from excelalchemy import ExcelAlchemy
+from excelalchemy import ExporterConfig
+from excelalchemy import FieldMeta
+from excelalchemy import ImporterConfig
+from excelalchemy import ImportMode
 from excelalchemy import Key
+from excelalchemy import Number
+from excelalchemy import NumberRange
 from excelalchemy import Option
 from excelalchemy import OptionId
-from excelalchemy.helper.pydantic import extract_pydantic_model
-from excelalchemy.types.alchemy import ExcelExporterConfig
-from excelalchemy.types.alchemy import ExcelImporterConfig
-from excelalchemy.types.alchemy import ImportMode
-from excelalchemy.types.column.field import FieldMeta
-from excelalchemy.types.value.number import Number
-from excelalchemy.types.value.number_range import NumberRange
-from excelalchemy.types.value.string import String
+from excelalchemy import String
+from excelalchemy import extract_pydantic_model
 
 
 class ThingCreateSuccessImporter(BaseModel):
@@ -125,8 +125,8 @@ class TestExcelAlchemy(IsolatedAsyncioTestCase):
         print(field_metas)
 
     async def test_create_import_no_error(self):
-        alchemy = ExcelAlchemy[dict[Key, Any], ExcelImporterConfig](
-            ExcelImporterConfig[dict[Key, Any], ThingCreateSuccessImporter, ThingUpdaterSuccessImporter](
+        alchemy = ExcelAlchemy[dict[Key, Any], ImporterConfig](
+            ImporterConfig[dict[Key, Any], ThingCreateSuccessImporter, ThingUpdaterSuccessImporter](
                 import_mode=ImportMode.CREATE,
                 minio=self.instance,
                 bucket_name='api',
@@ -155,8 +155,8 @@ class TestExcelAlchemy(IsolatedAsyncioTestCase):
         print(import_result)
 
     async def test_create_import_with_error(self):
-        alchemy = ExcelAlchemy[dict[Key, Any], ExcelImporterConfig](
-            ExcelImporterConfig[dict[Key, Any], ThingCreateFailedImporter, ThingUpdaterSuccessImporter](
+        alchemy = ExcelAlchemy[dict[Key, Any], ImporterConfig](
+            ImporterConfig[dict[Key, Any], ThingCreateFailedImporter, ThingUpdaterSuccessImporter](
                 import_mode=ImportMode.CREATE,
                 minio=self.instance,
                 bucket_name='api',
@@ -174,8 +174,8 @@ class TestExcelAlchemy(IsolatedAsyncioTestCase):
         print(import_result)
 
     async def test_export_excel(self):
-        alchemy = ExcelAlchemy[Any, ExcelExporterConfig](
-            ExcelExporterConfig[ThingCreateFailedImporter](
+        alchemy = ExcelAlchemy[Any, ExporterConfig](
+            ExporterConfig[ThingCreateFailedImporter](
                 minio=self.instance,
                 bucket_name='api',
                 exporter_model=ThingCreateFailedImporter,

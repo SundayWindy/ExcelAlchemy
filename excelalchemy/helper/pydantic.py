@@ -20,7 +20,7 @@ from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ProgrammaticError
 from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.abstract import ComplexABCValueType
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.identity import Key
 
 ModelT = TypeVar('ModelT', bound=BaseModel)

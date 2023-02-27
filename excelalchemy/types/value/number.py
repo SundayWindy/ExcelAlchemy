@@ -6,7 +6,7 @@ from decimal import InvalidOperation
 from typing import Any
 
 from excelalchemy.types.abstract import ABCValueType
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 
 
 def canonicalize_decimal(d: Decimal, fraction_digits_limit: int | None) -> Decimal:

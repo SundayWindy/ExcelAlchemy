@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from typing import Any
 
 from excelalchemy.types.abstract import ABCValueType
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.value import excel_choice
 
 

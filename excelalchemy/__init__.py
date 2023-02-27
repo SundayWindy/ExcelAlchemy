@@ -9,11 +9,12 @@ from excelalchemy.const import Option
 from excelalchemy.core.alchemy import ExcelAlchemy
 from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ProgrammaticError
-from excelalchemy.types.alchemy import ExcelExporterConfig
-from excelalchemy.types.alchemy import ExcelImporterConfig
+from excelalchemy.helper.pydantic import extract_pydantic_model
+from excelalchemy.types.alchemy import ExporterConfig
+from excelalchemy.types.alchemy import ImporterConfig
 from excelalchemy.types.alchemy import ImportMode
-from excelalchemy.types.column.field import FieldMeta
-from excelalchemy.types.column.field import PatchFieldMeta
+from excelalchemy.types.field import FieldMeta
+from excelalchemy.types.field import PatchFieldMeta
 from excelalchemy.types.identity import ColumnIndex
 from excelalchemy.types.identity import Key
 from excelalchemy.types.identity import Label
@@ -51,8 +52,8 @@ __all__ = [
     'ProgrammaticError',
     'FieldMeta',
     'PatchFieldMeta',
-    'ExcelExporterConfig',
-    'ExcelImporterConfig',
+    'ExporterConfig',
+    'ImporterConfig',
     'ImportMode',
     'ColumnIndex',
     'Key',
@@ -84,4 +85,6 @@ __all__ = [
     'flatten',
     'SingleTreeNode',
     'MultiTreeNode',
+    'Option',
+    'extract_pydantic_model',
 ]

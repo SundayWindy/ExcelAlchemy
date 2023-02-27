@@ -4,16 +4,12 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Iterable
 
-from pydantic import BaseModel
-from pydantic import Field
-from pydantic.fields import FieldInfo
 from pydantic.fields import ModelField
 
 from excelalchemy.types.identity import Key
-from excelalchemy.types.identity import Label
 
 if TYPE_CHECKING:
-    from excelalchemy.types.column.field import FieldMetaInfo
+    from excelalchemy.types.field import FieldMetaInfo
 else:
     FieldMetaInfo = Any
 
@@ -80,17 +76,6 @@ class ComplexABCValueType(ABCValueType, dict):  # pyright: reportMissingTypeArgu
     @abstractmethod
     def model_items(cls) -> list[tuple[Key, 'FieldMetaInfo']]:
         """用于获取模型的所有字段名"""
-
-
-class ABCExcelHeader(BaseModel):
-    """用于表示用户输入的 Excel 表头信息
-
-    对于两行合并的数据，下层为 None 时，label 取上层的值，parent_label 为 None
-    """
-
-    label: Label = Field(description='Excel 的列名')
-    parent_label: Label = Field(description='Excel 的父列名')
-    offset: int = Field(default=0, description='合并表头·子单元格所属父单元格的偏移量')
 
 
 class SystemReserved(ABCValueType):

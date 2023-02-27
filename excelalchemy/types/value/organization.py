@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.identity import OptionId
 from excelalchemy.types.value.multi_checkbox import MultiCheckbox
 from excelalchemy.types.value.radio import Radio

@@ -4,7 +4,7 @@ from typing import Any
 from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
 from excelalchemy.exc import ProgrammaticError
 from excelalchemy.types.abstract import ABCValueType
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.identity import OptionId
 
 

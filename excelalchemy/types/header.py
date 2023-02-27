@@ -1,13 +1,13 @@
 """用于表示用户实际输入 Excel 的表头"""
+from pydantic import BaseModel
 from pydantic.fields import Field
 
 from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
-from excelalchemy.types.abstract import ABCExcelHeader
 from excelalchemy.types.identity import Label
 from excelalchemy.types.identity import UniqueLabel
 
 
-class ExcelHeader(ABCExcelHeader):
+class ExcelHeader(BaseModel):
     """用于表示用户输入的 Excel 表头信息"""
 
     label: Label = Field(description='Excel 的列名')

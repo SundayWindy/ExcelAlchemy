@@ -3,7 +3,7 @@ from typing import Any
 from pydantic import BaseModel
 from pydantic import HttpUrl
 
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.value.string import String
 
 

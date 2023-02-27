@@ -33,7 +33,7 @@ class ImportMode(str, Enum):
 
 
 @dataclass
-class ExcelImporterConfig(Generic[ContextT, CreateImporterModelT, UpdateImporterModelT]):
+class ImporterConfig(Generic[ContextT, CreateImporterModelT, UpdateImporterModelT]):
     import_mode: ImportMode = field(default=ImportMode.CREATE)
 
     create_importer_model: Type[CreateImporterModelT] | None = field(default=None)
@@ -104,7 +104,7 @@ class ExcelImporterConfig(Generic[ContextT, CreateImporterModelT, UpdateImporter
 
 
 @dataclass
-class ExcelExporterConfig(Generic[ExporterModelT]):
+class ExporterConfig(Generic[ExporterModelT]):
     exporter_model: Type[ExporterModelT]
     # Callable function receive Key as dict key instead of Label.
     data_converter: Callable[[dict[str, Any]], dict[str, Any]] | None = field(default=export_data_converter)

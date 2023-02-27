@@ -12,7 +12,7 @@ from excelalchemy.const import DATE_FORMAT_TO_PYTHON_MAPPING
 from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.const import DataRangeOption
 from excelalchemy.types.abstract import ABCValueType
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 
 
 class Date(ABCValueType, datetime):

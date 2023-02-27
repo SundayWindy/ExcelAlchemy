@@ -26,7 +26,7 @@ from excelalchemy.const import HEADER_HINT
 from excelalchemy.const import REASON_COLUMN_LABEL
 from excelalchemy.const import RESULT_COLUMN_LABEL
 from excelalchemy.exc import ExcelCellError
-from excelalchemy.types.column.field import FieldMetaInfo
+from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.identity import Base64Str
 from excelalchemy.types.identity import ColumnIndex
 from excelalchemy.types.identity import Label

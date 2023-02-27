@@ -33,12 +33,12 @@ from excelalchemy.exc import ExcelRowError
 from excelalchemy.helper.pydantic import extract_pydantic_model
 from excelalchemy.helper.pydantic import instantiate_pydantic_model
 from excelalchemy.types.abstract import SystemReserved
-from excelalchemy.types.alchemy import ExcelExporterConfig
-from excelalchemy.types.alchemy import ExcelImporterConfig
 from excelalchemy.types.alchemy import ExcelMode
+from excelalchemy.types.alchemy import ExporterConfig
+from excelalchemy.types.alchemy import ImporterConfig
 from excelalchemy.types.alchemy import ImportMode
-from excelalchemy.types.column.field import FieldMetaInfo
-from excelalchemy.types.column.header import ExcelHeader
+from excelalchemy.types.field import FieldMetaInfo
+from excelalchemy.types.header import ExcelHeader
 from excelalchemy.types.identity import Base64Str
 from excelalchemy.types.identity import ColumnIndex
 from excelalchemy.types.identity import Key
@@ -106,7 +106,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
         """从配置类初始化"""
 
         if self.excel_mode == ExcelMode.IMPORT:
-            if not isinstance(self.config, ExcelImporterConfig):
+            if not isinstance(self.config, ImporterConfig):
                 raise TypeError('导入模式的配置类必须是 ImportExcelConfig')
             self.context = self.config.context
             if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
@@ -116,7 +116,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             else:
                 raise RuntimeError('不支持的导入模式')
         elif self.excel_mode == ExcelMode.EXPORT:
-            if not isinstance(self.config, ExcelExporterConfig):
+            if not isinstance(self.config, ExporterConfig):
                 raise TypeError('导出模式的配置类必须是 ExportExcelConfig')
             config_importer_model = self.config.exporter_model
         else:
@@ -165,7 +165,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     async def import_data(self, input_excel_name: str, output_excel_name: str) -> ImportResult:
         """导入数据"""
-        assert isinstance(self.config, ExcelImporterConfig)  # only for type check
+        assert isinstance(self.config, ImporterConfig)  # only for type check
         if self.excel_mode != ExcelMode.IMPORT:
             raise RuntimeError('只支持导入模式调用此方法')
 
@@ -198,7 +198,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     def export_excel_data(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> Base64Str:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
-        assert isinstance(self.config, ExcelExporterConfig)  # only for type check
+        assert isinstance(self.config, ExporterConfig)  # only for type check
 
         if self.excel_mode != ExcelMode.EXPORT:
             raise RuntimeError('只支持导出模式调用此方法')
@@ -254,9 +254,9 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
     def excel_mode(self) -> ExcelMode:
         if self.config is None:
             raise RuntimeError('请先设置转换模型配置')
-        if isinstance(self.config, ExcelImporterConfig):
+        if isinstance(self.config, ImporterConfig):
             return ExcelMode.IMPORT
-        if isinstance(self.config, ExcelExporterConfig):
+        if isinstance(self.config, ExporterConfig):
             return ExcelMode.EXPORT
         raise RuntimeError('未知的转换模型配置')
 
@@ -295,7 +295,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
         """验证表头"""
         if self.excel_mode != ExcelMode.IMPORT:
             raise RuntimeError('只支持导入模式调用此方法')
-        assert isinstance(self.config, ExcelImporterConfig)  # only for type hint, not for runtime
+        assert isinstance(self.config, ImporterConfig)  # only for type hint, not for runtime
         self._read_dataframe(input_excel_name)
 
         required_labels = [x.label for x in self.ordered_field_meta if x.required]
@@ -333,7 +333,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     def _upload_file(self, output_excel_name: str, content_with_prefix: str) -> str:
         """上传文件"""
-        assert isinstance(self.config, (ExcelExporterConfig, ExcelImporterConfig))  # only for type check
+        assert isinstance(self.config, (ExporterConfig, ImporterConfig))  # only for type check
         url = upload_file_from_minio_object(
             self.config.minio,
             self.config.bucket_name,
@@ -406,7 +406,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     def _read_dataframe(self, input_excel_name: str) -> pandas.DataFrame:
         """读取 DataFrame"""
-        assert isinstance(self.config, ExcelImporterConfig)  # only for type check
+        assert isinstance(self.config, ImporterConfig)  # only for type check
         if not self.__state_df_has_been_loaded__:
             file_object = read_file_from_minio_object(
                 # pyright: reportUnknownMemberType=false
@@ -513,7 +513,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     async def _dml_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用 DML"""
-        if not isinstance(self.config, ExcelImporterConfig):
+        if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
 
         match self.config.import_mode:
@@ -530,7 +530,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     async def _creator_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用创建函数, 返回是否创建成功"""
-        if not isinstance(self.config, ExcelImporterConfig):
+        if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
         if self.config.creator is None:
             raise RuntimeError('未配置 creator')
@@ -547,7 +547,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     async def _updater_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用更新函数, 返回是否创建成功"""
-        if not isinstance(self.config, ExcelImporterConfig):
+        if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
         if self.config.updater is None:
             raise RuntimeError('未配置 updater')
@@ -599,7 +599,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     async def _creator_or_updater_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用 creator 或者 updater"""
-        if not isinstance(self.config, ExcelImporterConfig):
+        if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
         is_data_exists_func = self.config.is_data_exist
         if is_data_exists_func is None:
@@ -619,7 +619,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
         2、将 Label 转换为 Key
 
         """
-        assert isinstance(self.config, ExcelImporterConfig)
+        assert isinstance(self.config, ImporterConfig)
         agg_data: dict[Key, Any] = {}
         for unique_label, value in row_data.items():
             field_meta = self.unique_label_to_field_meta[unique_label]

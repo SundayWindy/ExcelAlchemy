@@ -59,8 +59,8 @@ ListStr = List[str]
 IntStr = Union[int, str]
 ExcelConfigT = TypeVar('ExcelConfigT')
 ContextT = TypeVar('ContextT')
-CreateImporterModelT = TypeVar('CreateImporterModelT', bound=BaseModel)
-UpdateImporterModelT = TypeVar('UpdateImporterModelT', bound=BaseModel)
+ImporterCreateModelT = TypeVar('ImporterCreateModelT', bound=BaseModel)
+ImporterUpdateModelT = TypeVar('ImporterUpdateModelT', bound=BaseModel)
 ExporterModelT = TypeVar('ExporterModelT', bound=BaseModel)
 CreateModelT = TypeVar('CreateModelT', bound=BaseModel)
 UpdateModelT = TypeVar('UpdateModelT', bound=BaseModel)

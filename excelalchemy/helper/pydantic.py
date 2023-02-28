@@ -14,8 +14,8 @@ from pydantic.error_wrappers import ErrorWrapper
 from pydantic.fields import ModelField
 from pydantic.fields import UndefinedType
 
-from excelalchemy.const import CreateImporterModelT
-from excelalchemy.const import UpdateImporterModelT
+from excelalchemy.const import ImporterCreateModelT
+from excelalchemy.const import ImporterUpdateModelT
 from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ProgrammaticError
 from excelalchemy.types.abstract import ABCValueType
@@ -27,7 +27,7 @@ ModelT = TypeVar('ModelT', bound=BaseModel)
 
 
 def extract_pydantic_model(
-    model: type[CreateImporterModelT] | type[UpdateImporterModelT] | None,
+    model: type[ImporterCreateModelT] | type[ImporterUpdateModelT] | None,
 ) -> list[FieldMetaInfo]:
     """根据 Pydantic 模型提取 Excel 表头信息
     包含是否必填、值类型、注释等信息

@@ -107,7 +107,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
         if self.excel_mode == ExcelMode.IMPORT:
             if not isinstance(self.config, ImporterConfig):
-                raise TypeError('导入模式的配置类必须是 ImportExcelConfig')
+                raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
             self.context = self.config.context
             if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
                 config_importer_model = self.config.create_importer_model
@@ -117,7 +117,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
                 raise RuntimeError('不支持的导入模式')
         elif self.excel_mode == ExcelMode.EXPORT:
             if not isinstance(self.config, ExporterConfig):
-                raise TypeError('导出模式的配置类必须是 ExportExcelConfig')
+                raise TypeError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
             config_importer_model = self.config.exporter_model
         else:
             raise RuntimeError('不支持的模式')
@@ -548,7 +548,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
     async def _updater_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用更新函数, 返回是否创建成功"""
         if not isinstance(self.config, ImporterConfig):
-            raise TypeError('只有 ExcelImporterConfig 才支持 DML')
+            raise TypeError(f'只有 {ImporterConfig.__name__} 才支持 DML')
         if self.config.updater is None:
             raise RuntimeError('未配置 updater')
         if self.config.update_importer_model is None:
@@ -600,7 +600,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
     async def _creator_or_updater_caller(self, row_index: RowIndex, data: dict[Key, Any]) -> bool:
         """调用 creator 或者 updater"""
         if not isinstance(self.config, ImporterConfig):
-            raise TypeError('只有 ExcelImporterConfig 才支持 DML')
+            raise TypeError(f'只有 {ImporterConfig.__name__} 才支持 DML')
         is_data_exists_func = self.config.is_data_exist
         if is_data_exists_func is None:
             raise RuntimeError('未配置 is_data_exists')

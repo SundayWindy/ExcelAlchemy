@@ -12,9 +12,9 @@ from typing import Type
 from minio import Minio
 
 from excelalchemy.const import ContextT
-from excelalchemy.const import CreateImporterModelT
+from excelalchemy.const import ImporterCreateModelT
 from excelalchemy.const import ExporterModelT
-from excelalchemy.const import UpdateImporterModelT
+from excelalchemy.const import ImporterUpdateModelT
 from excelalchemy.util.convertor import export_data_converter
 from excelalchemy.util.convertor import import_data_converter
 
@@ -33,11 +33,11 @@ class ImportMode(str, Enum):
 
 
 @dataclass
-class ImporterConfig(Generic[ContextT, CreateImporterModelT, UpdateImporterModelT]):
+class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModelT]):
     import_mode: ImportMode = field(default=ImportMode.CREATE)
 
-    create_importer_model: Type[CreateImporterModelT] | None = field(default=None)
-    update_importer_model: Type[UpdateImporterModelT] | None = field(default=None)
+    create_importer_model: Type[ImporterCreateModelT] | None = field(default=None)
+    update_importer_model: Type[ImporterUpdateModelT] | None = field(default=None)
 
     # Callable function receive Key as dict key instead of Label.
     data_converter: Callable[[dict[str, Any]], dict[str, Any]] | None = field(default=import_data_converter)

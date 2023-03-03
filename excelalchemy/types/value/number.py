@@ -9,26 +9,34 @@ from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.field import FieldMetaInfo
 
 
-def canonicalize_decimal(d: Decimal, fraction_digits_limit: int | None) -> Decimal:
-    if fraction_digits_limit is not None and abs(d.as_tuple().exponent) != fraction_digits_limit:
+def canonicalize_decimal(value: Decimal, digits_limit: int | None) -> Decimal:
+    """将 Decimal 转换为指定精度的 Decimal"""
+    if digits_limit is not None and abs(value.as_tuple().exponent) != digits_limit:
         try:
-            d = Decimal(d).quantize(Decimal(f'0.{"0" * fraction_digits_limit}'), context=Context(rounding=ROUND_DOWN))
+            value = Decimal(value).quantize(
+                Decimal(f'0.{"0" * digits_limit}'),
+                context=Context(rounding=ROUND_DOWN),
+            )
         except InvalidOperation as e:
             logging.warning('精度设置的过小，导致精度丢失，%s', e)
-    return d
+    return value
 
 
-def transform_decimal(d: Decimal | int | float | None) -> float | int | None:
-    if d is None:
+def transform_decimal(value: Decimal | int | float | None) -> float | int | None:
+    """将 Decimal 转换为 float 或 int"""
+    if value is None:
         return None
-    if isinstance(d, float):
-        return d
-    if isinstance(d, int):
-        return d
-    if d.as_tuple().exponent == 0:
-        return int(d)
+
+    if isinstance(value, int | float):
+        return value
+
+    if not isinstance(value, Decimal):
+        raise TypeError(f'Expected Decimal, got {type(value)}')
+
+    if value.as_tuple().exponent == 0:
+        return int(value)
     else:
-        return float(d)
+        return float(value)
 
 
 class Number(Decimal, ABCValueType):
@@ -37,19 +45,19 @@ class Number(Decimal, ABCValueType):
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
         required = '必填' if field_meta.required else '非必填'
-        format_ = '数值'
-        fraction_digits = field_meta.fraction_digits or 0
-        if field_meta.importer_le is None and field_meta.importer_ge is None:
-            range_ = '无限制'
-        elif field_meta.importer_le is None:
-            range_ = f'≥ {field_meta.importer_ge}'
-        elif field_meta.importer_ge is None:
-            range_ = f'≤ {field_meta.importer_le}'
-        else:
-            range_ = f'{field_meta.importer_ge}～{field_meta.importer_le}'
         unit = field_meta.unit or '无'
-        extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
-        return f"""必填性：{required}\n格式：{format_}\n小数位数：{fraction_digits}\n可输入范围：{range_}\n单位：{unit}""" + extra_hint
+        extra_hint = f'提示：{field_meta.hint}' if field_meta.hint else ''
+        format_ = '数值'
+        range_ = cls.__get_range_description__(field_meta)
+
+        return (
+            f"""必填性：{required}
+            格式：{format_}
+            小数位数：{field_meta.fraction_digits}
+            可输入范围：{range_}
+            单位：{unit}"""
+            + extra_hint
+        )
 
     @classmethod
     def serialize(cls, value: str | int | float, field_meta: FieldMetaInfo) -> Decimal | Any:
@@ -62,43 +70,6 @@ class Number(Decimal, ABCValueType):
             return str(value) if value is not None else ''
 
     @classmethod
-    def __validate__(cls, v: Decimal | Any, field_meta: FieldMetaInfo) -> float | int:
-        if not isinstance(v, Decimal):
-            try:
-                parsed = Decimal(str(v))
-            except Exception as exc:
-                raise ValueError('请输入数字') from exc
-        else:
-            parsed = v
-
-        errors: list[str] = []
-
-        # importer_le 取值 field_meta.importer_le 或者无穷大
-        importer_le = field_meta.importer_le or Decimal('Infinity')
-        # importer_ge 取值 field_meta.importer_ge 或者无穷小
-        importer_ge = field_meta.importer_ge or Decimal('-Infinity')
-
-        if not importer_ge <= parsed <= importer_le:
-            if field_meta.importer_le and field_meta.importer_ge:
-                errors.append(f'请输入{field_meta.importer_ge}～{field_meta.importer_le}范围内的数字')
-            elif field_meta.importer_le:
-                errors.append(f'请输入-∞～{field_meta.importer_le}范围内的数字')
-            elif field_meta.importer_ge:
-                errors.append(f'请输入{field_meta.importer_ge}～+∞范围内的数字')
-            else:
-                pass
-
-        parsed = canonicalize_decimal(parsed, field_meta.fraction_digits)
-
-        if errors:
-            raise ValueError(*errors)
-        else:
-            v = transform_decimal(parsed)
-            if v is None:
-                raise ValueError('请输入数字')
-            return v
-
-    @classmethod
     def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
         if value is None or value == '':
             return ''
@@ -107,3 +78,63 @@ class Number(Decimal, ABCValueType):
         except Exception as exc:
             logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s, 原因: %s', cls.__name__, value, exc)
             return str(value)
+
+    @classmethod
+    def __get_range_description__(cls, field_meta: FieldMetaInfo) -> str:
+        match (field_meta.importer_le, field_meta.importer_ge):
+            case (None, None):
+                return '无限制'
+            case (_, None):
+                return f'≥ {field_meta.importer_ge}'
+            case (None, _):
+                return f'≤ {field_meta.importer_le}'
+            case (le, ge):
+                return f'{ge}～{le}'
+
+    @staticmethod
+    def __maybe_decimal__(value: Any) -> Decimal | None:
+        # 如果输入不是 Decimal 类型，尝试转换。
+        if isinstance(value, Decimal):
+            return value
+
+        try:
+            parsed = Decimal(str(value))
+        except Exception as exc:
+            raise ValueError('无效输入，请输入数字。') from exc
+
+        return parsed
+
+    @staticmethod
+    def __check_range__(value: Decimal, field_meta: FieldMetaInfo) -> list[str]:
+        errors: list[str] = []
+
+        # 从 field_meta 对象中获取导入者上限和下限值。
+        importer_le = field_meta.importer_le or Decimal('Infinity')
+        importer_ge = field_meta.importer_ge or Decimal('-Infinity')
+
+        # 确保解析后的 decimal 在接受范围内。
+        if not importer_ge <= value <= importer_le:
+            if field_meta.importer_le and field_meta.importer_ge:
+                errors.append(f'请输入在 {field_meta.importer_ge} 和 {field_meta.importer_le} 之间的数字。')
+            elif field_meta.importer_le:
+                errors.append(f'请输入在 -∞ 和 {field_meta.importer_le} 之间的数字。')
+            elif field_meta.importer_ge:
+                errors.append(f'请输入在 {field_meta.importer_ge} 和 +∞ 之间的数字。')
+            else:
+                pass
+
+        return errors
+
+    @classmethod
+    def __validate__(cls, value: Decimal | Any, field_meta: FieldMetaInfo) -> float | int:
+        # 如果输入不是 Decimal 类型，尝试转换。
+        parsed = cls.__maybe_decimal__(value)
+        # 初始化一个错误信息列表。
+        errors: list[str] = cls.__check_range__(value, field_meta)
+        if errors:
+            raise ValueError(*errors)
+        parsed = canonicalize_decimal(parsed, field_meta.fraction_digits)
+        value = transform_decimal(parsed)
+        if value is None:
+            raise ValueError('无效输入，请输入数字。')
+        return value

@@ -16,7 +16,7 @@ else:
 
 class ABCValueType(ABC):
     """
-    raw_data --> serialize --> _validate
+    raw_data --> serialize --> __validate__
     raw_data--> deserialize
     """
 

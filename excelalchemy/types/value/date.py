@@ -50,7 +50,7 @@ class Date(ABCValueType, datetime):
             return value
 
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> int:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> int:
         if field_meta.date_format is None:
             raise RuntimeError('日期格式未定义')
         if not isinstance(v, datetime):

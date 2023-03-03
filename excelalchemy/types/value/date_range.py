@@ -91,7 +91,7 @@ class DateRange(ComplexABCValueType):
             return value
 
     @classmethod
-    def _validate(
+    def __validate__(
         cls,
         v: dict[str, DateTime | None] | Any,
         field_meta: FieldMetaInfo,

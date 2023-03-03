@@ -55,7 +55,7 @@ class NumberRange(ComplexABCValueType):
 
     # pylint: disable=too-many-branches
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
         if not isinstance(v, NumberRange):
             try:
                 v['start'] = canonicalize_decimal(Decimal(v['start']), field_meta.fraction_digits)

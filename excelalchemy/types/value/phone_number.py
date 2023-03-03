@@ -9,7 +9,7 @@ PHONE_NUMBER_PATTERN = re.compile(r'^((0\d{2,3}-\d{7,8})|(1[3456789]\d{9}))$')
 
 class PhoneNumber(String):
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> str:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> str:
         try:
             parsed = str(v)
         except Exception as exc:

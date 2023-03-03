@@ -26,7 +26,7 @@ class Radio(ABCValueType, str):
         return str(value).strip()
 
     @classmethod
-    def _validate(cls, v: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
+    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
         if MULTI_CHECKBOX_SEPARATOR in v:
             raise ValueError('不允许多选')
 

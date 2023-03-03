@@ -29,7 +29,7 @@ class MultiCheckbox(ABCValueType, list[str]):
         return value
 
     @classmethod
-    def _validate(cls, v: list[str] | Any, field_meta: FieldMetaInfo) -> list[str]:  # OptionId
+    def __validate__(cls, v: list[str] | Any, field_meta: FieldMetaInfo) -> list[str]:  # OptionId
         if not isinstance(v, list):
             raise ValueError('选项不存在，请参照表头的注释填写')
 

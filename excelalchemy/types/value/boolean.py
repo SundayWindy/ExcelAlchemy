@@ -22,7 +22,7 @@ class Boolean(ABCValueType):
         return str(value).strip()
 
     @classmethod
-    def _validate(cls, v: str | bool | Any, field_meta: FieldMetaInfo) -> bool:
+    def __validate__(cls, v: str | bool | Any, field_meta: FieldMetaInfo) -> bool:
         if isinstance(v, bool):
             return v
 

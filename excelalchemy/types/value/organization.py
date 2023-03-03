@@ -47,8 +47,8 @@ class MultiOrganization(MultiCheckbox):
         return super().serialize(value, field_meta)
 
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
-        return super()._validate(v, field_meta)
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
+        return super().__validate(v, field_meta)
 
     @classmethod
     def deserialize(cls, value: str | list[str] | None | Any, field_meta: FieldMetaInfo) -> str | Any:

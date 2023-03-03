@@ -62,7 +62,7 @@ class Number(Decimal, ABCValueType):
             return str(value) if value is not None else ''
 
     @classmethod
-    def _validate(cls, v: Decimal | Any, field_meta: FieldMetaInfo) -> float | int:
+    def __validate__(cls, v: Decimal | Any, field_meta: FieldMetaInfo) -> float | int:
         if not isinstance(v, Decimal):
             try:
                 parsed = Decimal(str(v))

@@ -52,8 +52,8 @@ class MultiStaff(MultiCheckbox):
         return value if value is not None else ''
 
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
-        return super()._validate(v, field_meta)
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
+        return super().__validate(v, field_meta)
 
     @classmethod
     def deserialize(cls, value: str | list[OptionId] | Any, field_meta: FieldMetaInfo) -> Any:

@@ -6,6 +6,6 @@ from excelalchemy.types.value.number import Number
 
 class Money(Number):
     @classmethod
-    def _validate(cls, v: Any, field_meta: FieldMetaInfo) -> float | int:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> float | int:
         field_meta.fraction_digits = 2
-        return super()._validate(v, field_meta)
+        return super().__validate(v, field_meta)

@@ -94,7 +94,7 @@ class String(str, ABCValueType):
         return str(value).strip()
 
     @classmethod
-    def _validate(cls, v: str, field_meta: FieldMetaInfo) -> str:
+    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> str:
         try:
             parsed = str(v)
         except Exception as exc:

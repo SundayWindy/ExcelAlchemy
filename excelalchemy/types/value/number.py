@@ -105,7 +105,7 @@ class Number(Decimal, ABCValueType):
         return parsed
 
     @staticmethod
-    def __check_range__(value: Decimal, field_meta: FieldMetaInfo) -> list[str]:
+    def __check_range__(value: Decimal | float | int, field_meta: FieldMetaInfo) -> list[str]:
         errors: list[str] = []
 
         # 从 field_meta 对象中获取导入者上限和下限值。

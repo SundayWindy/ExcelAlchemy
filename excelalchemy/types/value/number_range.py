@@ -35,72 +35,25 @@ class NumberRange(ComplexABCValueType):
         return Number.comment(field_meta)
 
     @classmethod
-    def serialize(
-        cls,
-        value: dict[str, str] | str | Any,
-        field_meta: FieldMetaInfo,
-    ) -> Any:
+    def serialize(cls, value: dict[str, str] | str | Any, field_meta: FieldMetaInfo) -> Any:
+        # Strip leading/trailing whitespace from a string value
         if isinstance(value, str):
             value = value.strip()
 
+        # Return the given value if it is already a NumberRange object
         if isinstance(value, NumberRange):
             return value
+
+        # Attempt to create a new NumberRange object from a dictionary
         try:
-            # pyright: reportGeneralTypeIssues=false
-            return NumberRange(Decimal(value['start']), Decimal(value['end']))  # type: ignore[index]
-        except Exception as exc:
-            logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s, 原因: %s', cls.__name__, value, exc)
+            start = Decimal(value['start'])
+            end = Decimal(value['end'])
+            return NumberRange(start, end)
+        except (KeyError, TypeError, ValueError) as exc:
+            logging.warning(f'{cls.__name__} 类型无法解析 Excel 输入，返回原值 {value}。原因：{exc}')
 
+        # Return the original value if parsing fails
         return value
-
-    # pylint: disable=too-many-branches
-    @classmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
-        if not isinstance(v, NumberRange):
-            try:
-                v['start'] = canonicalize_decimal(Decimal(v['start']), field_meta.fraction_digits)
-                v['end'] = canonicalize_decimal(Decimal(v['end']), field_meta.fraction_digits)
-                parsed = NumberRange(v['start'], v['end'])
-            except Exception as exc:
-                raise ValueError('请输入数字') from exc
-        else:
-            parsed = v
-
-        errors: list[str] = []
-        if parsed.start is not None and parsed.end is not None and parsed.start > parsed.end:
-            errors.append('最小值不能大于最大值')
-
-        # importer_le 取值 field_meta.importer_le 或者无穷大
-        importer_le = field_meta.importer_le or Decimal('Infinity')
-        # importer_ge 取值 field_meta.importer_ge 或者无穷小
-        importer_ge = field_meta.importer_ge or Decimal('-Infinity')
-
-        if parsed.start is not None:
-            if not importer_ge <= parsed.start <= importer_le:
-                if field_meta.importer_le and field_meta.importer_ge:
-                    errors.append(f'请输入{field_meta.importer_ge}～{field_meta.importer_le}范围内的数字')
-                elif field_meta.importer_le:
-                    errors.append(f'请输入-∞～{field_meta.importer_le}范围内的数字')
-                elif field_meta.importer_ge:
-                    errors.append(f'请输入{field_meta.importer_ge}～+∞范围内的数字')
-                else:
-                    pass
-
-        if parsed.end is not None:
-            if not importer_ge <= parsed.end <= importer_le:
-                if field_meta.importer_le and field_meta.importer_ge:
-                    errors.append(f'请输入{field_meta.importer_ge}～{field_meta.importer_le}范围内的数字')
-                elif field_meta.importer_le:
-                    errors.append(f'请输入-∞～{field_meta.importer_le}范围内的数字')
-                elif field_meta.importer_ge:
-                    errors.append(f'请输入{field_meta.importer_ge}～+∞范围内的数字')
-                else:
-                    pass
-
-        if errors:
-            raise ValueError(*errors)
-        else:
-            return parsed
 
     @classmethod
     def deserialize(cls, value: Any | None, field_meta: FieldMetaInfo) -> str:
@@ -111,3 +64,33 @@ class NumberRange(ComplexABCValueType):
         except Exception as exc:
             logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s, 原因: %s', cls.__name__, value, exc)
             return str(value)
+
+    @classmethod
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
+        parsed = cls.__maybe_number_range__(value, field_meta)
+        errors: list[str] = []
+        if parsed.start is not None and parsed.end is not None and parsed.start > parsed.end:
+            errors.append('最小值不能大于最大值')
+
+        if parsed.start is not None:
+            errors.extend(Number.__check_range__(parsed.start, field_meta))
+        if parsed.end is not None:
+            errors.extend(Number.__check_range__(parsed.end, field_meta))
+
+        if errors:
+            raise ValueError(*errors)
+        else:
+            return parsed
+
+    @staticmethod
+    def __maybe_number_range__(value: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
+        if isinstance(value, NumberRange):
+            return value
+        if isinstance(value, dict):
+            try:
+                value['start'] = canonicalize_decimal(Decimal(value['start']), field_meta.fraction_digits)
+                value['end'] = canonicalize_decimal(Decimal(value['end']), field_meta.fraction_digits)
+                return NumberRange(value['start'], value['end'])
+            except Exception as exc:
+                raise ValueError('请输入数字') from exc
+        raise ValueError('请输入数字')

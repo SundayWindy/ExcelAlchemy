@@ -46,6 +46,12 @@ repos:
     rev: v2.16.2
     hooks:
     - id: pylint
+      name: pylint
+      entry: pylint
+      language: system
+      pass_filenames: false
+      args:
+        - excelalchemy
 
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v3.9.0

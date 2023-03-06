@@ -26,17 +26,17 @@ def _is_chinese_character(character: str) -> bool:
     # CJK Compatibility Ideographs Supplement 2F800–2FA1F Unifiable variant
     code_point = ord(character)
     return (
-        (0x4E00 <= code_point <= 0x9FFF)
-        or (0x3400 <= code_point <= 0x4DBF)
-        or (0x20000 <= code_point <= 0x2A6DF)
-        or (0x2A700 <= code_point <= 0x2B73F)
-        or (0x2B740 <= code_point <= 0x2B81F)
-        or (0x2B820 <= code_point <= 0x2CEAF)
-        or (0x2CEB0 <= code_point <= 0x2EBEF)
-        or (0x30000 <= code_point <= 0x3134F)
-        or (0x31350 <= code_point <= 0x323AF)
-        or (0xF900 <= code_point <= 0xFAFF)
-        or (0x2F800 <= code_point <= 0x2FA1F)
+            (0x4E00 <= code_point <= 0x9FFF)
+            or (0x3400 <= code_point <= 0x4DBF)
+            or (0x20000 <= code_point <= 0x2A6DF)
+            or (0x2A700 <= code_point <= 0x2B73F)
+            or (0x2B740 <= code_point <= 0x2B81F)
+            or (0x2B820 <= code_point <= 0x2CEAF)
+            or (0x2CEB0 <= code_point <= 0x2EBEF)
+            or (0x30000 <= code_point <= 0x3134F)
+            or (0x31350 <= code_point <= 0x323AF)
+            or (0xF900 <= code_point <= 0xFAFF)
+            or (0x2F800 <= code_point <= 0x2FA1F)
     )
 
 
@@ -85,13 +85,22 @@ class String(str, ABCValueType):
         max_length = field_meta.importer_max_length or '无限制'
         character_set = '中文、数字、大写字母、小写字母、符号'
         extra_hint = field_meta.hint
-        return f'唯一性：{unique}\n必填性：{required}\n最大长度：{max_length}\n可输入内容：{character_set}' + (
-            f'\n提示: {extra_hint}' if extra_hint else ''
+
+        return f"""唯一性：{unique}
+                必填性：{required}
+                最大长度：{max_length}
+                可输入内容：{character_set}""" + (
+            f'\n提示：{extra_hint}' if extra_hint else ''
         )
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> str:
         return str(value).strip()
+
+    @classmethod
+    def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
+        return str(value).strip() if value is not None else ''
+
 
     @classmethod
     def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> str:
@@ -119,6 +128,3 @@ class String(str, ABCValueType):
         else:
             return parsed
 
-    @classmethod
-    def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
-        return str(value).strip() if value is not None else ''

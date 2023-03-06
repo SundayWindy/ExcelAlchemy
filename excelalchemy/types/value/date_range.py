@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from typing import Any
-from typing import cast
 
 import pendulum
 
@@ -11,8 +10,8 @@ from pydantic import BaseModel
 
 from excelalchemy.const import DATE_FORMAT_TO_HINT_MAPPING
 from excelalchemy.const import DATE_FORMAT_TO_PYTHON_MAPPING
-from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.const import DataRangeOption
+from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.types.abstract import ComplexABCValueType
 from excelalchemy.types.field import FieldMetaInfo
 from excelalchemy.types.identity import Key
@@ -53,42 +52,39 @@ class DateRange(ComplexABCValueType):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '选填'
+        required_str = '必填' if field_meta.required else '选填'
         if field_meta.date_format is None:
             raise RuntimeError('日期格式未定义')
-        extra_hint = field_meta.hint or ''
+
         date_hint = DATE_FORMAT_TO_HINT_MAPPING[field_meta.date_format]
-        return f"""必填性：{required}\n格式：日期（{date_hint}）\n提示：开始日期不得晚于结束日期{extra_hint}"""
+        extra_hint = f', {field_meta.hint}' if field_meta.hint else ''
+
+        return f'''必填性：{required_str}
+        格式：日期（{date_hint}）
+        提示：开始日期不得晚于结束日期{extra_hint}'''
 
     @classmethod
     def serialize(cls, value: dict[str, str] | Any, field_meta: FieldMetaInfo) -> dict[str, DateTime | None] | Any:
-        if isinstance(value, dict):
-            try:
-                _start = value['start']
-                _end = value['end']
+        match value:
+            case dict():
+                try:
+                    start_str = value.get('start')
+                    end_str = value.get('end')
 
-                start: DateTime | None = (
-                    pendulum.parse(_start).replace(tzinfo=field_meta.timezone)  # type: ignore[union-attr,call-arg]
-                    if _start
-                    else None
-                )
-                end: DateTime | None = (
-                    pendulum.parse(_end).replace(tzinfo=field_meta.timezone)  # type: ignore[union-attr,call-arg]
-                    if _end
-                    else None
-                )
-                # pyright: reportGeneralTypeIssues=false
-                return {'start': start, 'end': end}
-            except Exception as exc:
-                logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s, 原因: %s', cls.__name__, value, exc)
+                    start_time = pendulum.parse(start_str).replace(tzinfo=field_meta.timezone) if start_str else None
+                    end_time = pendulum.parse(end_str).replace(tzinfo=field_meta.timezone) if end_str else None
+
+                    return {'start': start_time, 'end': end_time}
+                except Exception as e:
+                    logging.warning('Could not parse value %s for field %s. Reason: %s', value, cls.__name__, e)
+                    return value
+            case datetime():
                 return value
-        elif isinstance(value, datetime):
-            return value
-        elif isinstance(value, str):
-            d: DateTime = cast(DateTime, pendulum.parse(value))
-            return d.replace(tzinfo=field_meta.timezone)
-        else:
-            return value
+            case str():
+                datetime_value = pendulum.parse(value).replace(tzinfo=field_meta.timezone)
+                return datetime_value
+            case _:
+                return value
 
     @classmethod
     def __validate__(
@@ -126,26 +122,25 @@ class DateRange(ComplexABCValueType):
 
     @classmethod
     def deserialize(cls, value: dict[str, str] | str | Any | None, field_meta: FieldMetaInfo) -> str:
-        if value is None or value == '':
-            return ''
-        date_format = field_meta.date_format
-        if date_format is None:
-            raise RuntimeError('日期格式未定义')
-        py_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[date_format]
-        if isinstance(value, str):
-            return value
-
-        if isinstance(value, datetime):
-            return value.strftime(py_date_format)
-
-        if isinstance(value, dict):
-            start = value['start']
-            end = value['end']
-            if isinstance(start, (int, float)):
-                start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
-            if isinstance(end, (int, float)):
-                end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
-            return start + ' - ' + end
-
-        logging.warning('%s 反序列化失败，返回原值', cls.__name__)
-        return value if value is not None else ''
+        match value:
+            case None | '':
+                return ''
+            case str():
+                return value
+            case datetime():
+                date_format = field_meta.date_format
+                if not date_format:
+                    raise RuntimeError('日期格式未定义')
+                py_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[date_format]
+                return value.strftime(py_date_format)
+            case dict():
+                start = value['start']
+                end = value['end']
+                if isinstance(start, (int, float)):
+                    start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
+                if isinstance(end, (int, float)):
+                    end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
+                return start + ' - ' + end
+            case _:
+                logging.warning('%s 反序列化失败，返回原值', cls.__name__)
+                return value if value is not None else ''

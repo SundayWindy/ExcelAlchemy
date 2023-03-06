@@ -12,19 +12,38 @@ class MultiCheckbox(ABCValueType, list[str]):
     __name__ = '复选框组'
 
     @classmethod
-    def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '非必填'
-        option = f'{MULTI_CHECKBOX_SEPARATOR}'.join([x.name for x in (field_meta.options or [])])
+    def comment(cls, field: FieldMetaInfo) -> str:
+        # Determine whether the field is required or optional
+        required_str = '必填' if field.required else '非必填'
+
+        # Join available options into a string with the separator MULTI_CHECKBOX_SEPARATOR
+        options = MULTI_CHECKBOX_SEPARATOR.join(x.name for x in (field.options or []))
+
+        # Set 'is_multi' to always be '多选'
         is_multi = '多选'
-        hint = f'多选时，请用“{MULTI_CHECKBOX_SEPARATOR}”连接多个选项，如“选项1，选项2”' + (field_meta.hint or '')
-        return f"""必填性：{required}\n选项：{option}\n单/多选：{is_multi}\n提示：{hint}"""
+
+        # Add a hint message and the multi-select separator if the field is multi-select
+        hint = (field.hint or '') + (f'多选时，请用“{MULTI_CHECKBOX_SEPARATOR}”连接多个选项，如“选项1，选项2”' if field.options else '')
+
+        # Combine the four pieces of information into a formatted string
+        comment = f"""必填性：{required_str}
+                      选项：{options}
+                      单/多选：{is_multi}
+                      提示：{hint}"""
+
+        return comment
 
     @classmethod
-    def serialize(cls, value: str | Any, field_meta: FieldMetaInfo) -> list[str] | str:
+    def serialize(cls, value: str | Any, field: FieldMetaInfo) -> list[str] | str:
+        # If the value is a list, convert all items to strings and strip whitespace
         if isinstance(value, list):
-            return [str(x).strip() for x in value]
+            return [str(item).strip() for item in value]
+
+        # If the value is a string, split it into a list using MULTI_CHECKBOX_SEPARATOR and strip whitespace
         if isinstance(value, str):
-            return [x.strip() for x in value.split(MULTI_CHECKBOX_SEPARATOR)]
+            return [item.strip() for item in value.split(MULTI_CHECKBOX_SEPARATOR)]
+
+        # If the value is of an unsupported type, log a warning and return the original value
         logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s', cls.__name__, value)
         return value
 
@@ -59,21 +78,21 @@ class MultiCheckbox(ABCValueType, list[str]):
 
     @classmethod
     def deserialize(cls, value: str | list[OptionId] | None | Any, field_meta: FieldMetaInfo) -> Any:
-        if value is None or value == '':
-            return ''
-        if isinstance(value, str):
-            return value
-
-        if isinstance(value, list):
-            rst: list[str] = []
-            # pyright: reportUnknownArgumentType=false
-            for id_ in value:
-                try:
-                    rst.append(field_meta.options_id_map[id_].name)
-                except KeyError:
-                    logging.warning('类型【%s】无法为【%s】找到【%s】的选项, 返回原值', cls.__name__, field_meta.label, value)
-                    rst.append(id_)
-            return f'{MULTI_CHECKBOX_SEPARATOR}'.join(rst)
+        match value:
+            case None | '':
+                return ''
+            case str():
+                return value
+            case list():
+                rst: list[str] = []
+                # pyright: reportUnknownArgumentType=false
+                for id_ in value:
+                    try:
+                        rst.append(field_meta.options_id_map[id_].name)
+                    except KeyError:
+                        logging.warning('类型【%s】无法为【%s】找到【%s】的选项, 返回原值', cls.__name__, field_meta.label, value)
+                        rst.append(id_)
+                return f'{MULTI_CHECKBOX_SEPARATOR}'.join(rst)
 
         logging.warning('%s 反序列化失败', cls.__name__)
         return value if value is not None else ''

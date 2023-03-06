@@ -17,39 +17,15 @@ class Radio(ABCValueType, str):
         options = f'{MULTI_CHECKBOX_SEPARATOR}'.join([x.name for x in (field_meta.options or [])])
         is_multi = '单选'
         if not options:
-            logging.error('Radio 类型的字段 %s 必须设置 options', field_meta.label)
-        extra_hint = field_meta.hint
-        return f"""必填性：{required}\n选项：{options}\n单/多选：{is_multi}""" + (f'\n提示：{extra_hint}' if extra_hint else '')
+            logging.error('%s 类型的字段 %s 必须设置 options', cls.__name__, field_meta.label)
+        extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
+        return f"""必填性：{required}
+                选项：{options}
+                单/多选：{is_multi}{extra_hint}"""
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> str:
         return str(value).strip()
-
-    @classmethod
-    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
-        if MULTI_CHECKBOX_SEPARATOR in v:
-            raise ValueError('不允许多选')
-
-        errors: list[str] = []
-        parsed = v.strip()
-
-        if field_meta.options is None:
-            raise ProgrammaticError('options cannot be None when validate RADIO, MULTI_CHECKBOX and SELECT')
-
-        if not field_meta.options:  # empty
-            logging.warning('类型【%s】的字段【%s】的选项为空, 将返回原值', cls.__name__, field_meta.label)
-            return parsed
-
-        if parsed in field_meta.options_id_map:
-            return parsed
-
-        if parsed not in field_meta.options_name_map:
-            errors.append('选项不存在，请参照表头的注释填写')
-
-        if errors:
-            raise ValueError(*errors)
-        else:
-            return field_meta.options_name_map[parsed].id
 
     @classmethod
     def deserialize(cls, value: Any | None, field_meta: FieldMetaInfo) -> str:
@@ -67,3 +43,25 @@ class Radio(ABCValueType, str):
                 exc,
             )
         return value if value is not None else ''
+
+    @classmethod
+    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
+        if MULTI_CHECKBOX_SEPARATOR in v:
+            raise ValueError('多选不支持')
+
+        parsed = v.strip()
+
+        if field_meta.options is None:
+            raise ProgrammaticError('当验证【RADIO / MULTI_CHECKBOX / SELECT】类型字段时，选项不得为空！')
+
+        if not field_meta.options:  # empty
+            logging.warning(f'{cls.__name__}类型字段"{field_meta.label}"的选项为空，将返回原值')
+            return parsed
+
+        if parsed in field_meta.options_id_map:
+            return parsed
+
+        if parsed not in field_meta.options_name_map:
+            raise ValueError('选项不存在，请参照字段注释填写')
+
+        return field_meta.options_name_map[parsed].id

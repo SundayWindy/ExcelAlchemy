@@ -37,7 +37,7 @@ repos:
     hooks:
     - id: isort
       name: isort
-      entry: isort --check-only --line-length 120 --multi-line=3 --trailing-comma --force-grid-wrap=0 --use-parentheses .
+      entry: isort
       language: system
       pass_filenames: false
 
@@ -45,7 +45,6 @@ repos:
     rev: v0.3.1
     hooks:
     - id: absolufy-imports
-      args: [--force-single-line]
 
   - repo: https://github.com/PyCQA/pylint
     rev: v2.16.2
@@ -67,6 +66,8 @@ repos:
       entry: pyright
       language: system
       pass_filenames: false
+      args:
+        - excelalchemy
 
   - repo: local
     hooks:

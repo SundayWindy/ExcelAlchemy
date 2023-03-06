@@ -12,14 +12,14 @@ from pydantic.fields import FieldInfo
 from pydantic.fields import Undefined as PydanticUndefined
 from pydantic.typing import NoArgAnyCallable
 
-from excelalchemy.const import CharacterSet
 from excelalchemy.const import DEFAULT_FIELD_META_ORDER
+from excelalchemy.const import MAX_OPTIONS_COUNT
+from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
+from excelalchemy.const import CharacterSet
 from excelalchemy.const import DataRangeOption
 from excelalchemy.const import DateFormat
 from excelalchemy.const import IntStr
-from excelalchemy.const import MAX_OPTIONS_COUNT
 from excelalchemy.const import Option
-from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
 from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.abstract import Undefined
 from excelalchemy.types.identity import Key
@@ -240,7 +240,7 @@ class FieldMetaInfo(FieldInfo):
             )
         return {option.name: option for option in self.options}
 
-    def __option_ids_to_names__(self, option_ids: list[str]) -> list[str]:
+    def exchange_option_ids_to_names(self, option_ids: list[str]) -> list[str]:
         option_names = []
 
         for option_id in option_ids:

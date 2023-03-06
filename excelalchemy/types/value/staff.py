@@ -64,7 +64,7 @@ class MultiStaff(MultiCheckbox):
             if len(value) != len(set(value)):
                 raise ValueError('选项有重复')
 
-            option_names = field_meta.__option_ids_to_names__(value)
+            option_names = field_meta.exchange_option_ids_to_names(value)
             return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
 
         logging.warning('%s 反序列化失败', cls.__name__)

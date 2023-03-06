@@ -54,7 +54,7 @@ class MultiOrganization(MultiCheckbox):
             return value
 
         if isinstance(value, list):
-            option_names = field_meta.__option_ids_to_names__(value)
+            option_names = field_meta.exchange_option_ids_to_names(value)
             return MULTI_CHECKBOX_SEPARATOR.join(map(str, option_names))
 
         logging.warning('%s 反序列化失败', cls.__name__)

@@ -84,7 +84,7 @@ class MultiCheckbox(ABCValueType, list[str]):
             case str():
                 return value
             case list():
-                option_names = field_meta.__option_ids_to_names__(value)
+                option_names = field_meta.exchange_option_ids_to_names(value)
                 return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
 
         logging.warning('%s 反序列化失败', cls.__name__)

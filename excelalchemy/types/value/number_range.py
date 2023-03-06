@@ -50,7 +50,7 @@ class NumberRange(ComplexABCValueType):
             end = Decimal(value['end'])
             return NumberRange(start, end)
         except (KeyError, TypeError, ValueError) as exc:
-            logging.warning(f'{cls.__name__} 类型无法解析 Excel 输入，返回原值 {value}。原因：{exc}')
+            logging.warning('%s 类型无法解析 Excel 输入，返回原值 %s。原因：%s', cls.__name__, value, exc)
 
         # Return the original value if parsing fails
         return value

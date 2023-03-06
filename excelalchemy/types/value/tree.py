@@ -45,5 +45,5 @@ class MultiTreeNode(MultiCheckbox):
         return super().serialize(value, field_meta)
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
-        return super().__validate__(v, field_meta)
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> list[str]:
+        return super().__validate__(value, field_meta)

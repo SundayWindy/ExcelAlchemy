@@ -71,14 +71,14 @@ class Date(ABCValueType, datetime):
                 return str(value) if value is not None else ''
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> int:
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> int:
         if field_meta.date_format is None:
             raise RuntimeError('日期格式未定义')
 
-        if not isinstance(v, datetime):
+        if not isinstance(value, datetime):
             raise ValueError(f'请输入格式为{DATE_FORMAT_TO_HINT_MAPPING[field_meta.date_format]}的日期')
 
-        parsed = cls._parse_date(v, field_meta)
+        parsed = cls._parse_date(value, field_meta)
         errors = cls._validate_date_range(parsed, field_meta)
 
         if errors:

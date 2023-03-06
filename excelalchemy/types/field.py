@@ -248,7 +248,7 @@ class FieldMetaInfo(FieldInfo):
             try:
                 option_names.append(self.options_id_map[option_id].name)
             except KeyError:
-                logging.warning(f'找不到选项id {option_id}，将返回原值')
+                logging.warning('找不到选项id %s，将返回原值', option_id)
                 option_names.append(option_id)
 
         return option_names

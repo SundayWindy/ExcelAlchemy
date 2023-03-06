@@ -102,9 +102,9 @@ class String(str, ABCValueType):
         return str(value).strip() if value is not None else ''
 
     @classmethod
-    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> str:
+    def __validate__(cls, value: str, field_meta: FieldMetaInfo) -> str:
         try:
-            parsed = str(v)
+            parsed = str(value)
         except Exception as exc:
             raise ValueError('无法识别的输入') from exc
 

@@ -45,17 +45,17 @@ class Radio(ABCValueType, str):
         return value if value is not None else ''
 
     @classmethod
-    def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
-        if MULTI_CHECKBOX_SEPARATOR in v:
+    def __validate__(cls, value: str, field_meta: FieldMetaInfo) -> OptionId | str:  # return Option.id
+        if MULTI_CHECKBOX_SEPARATOR in value:
             raise ValueError('多选不支持')
 
-        parsed = v.strip()
+        parsed = value.strip()
 
         if field_meta.options is None:
             raise ProgrammaticError('当验证【RADIO / MULTI_CHECKBOX / SELECT】类型字段时，选项不得为空！')
 
         if not field_meta.options:  # empty
-            logging.warning(f'{cls.__name__}类型字段"{field_meta.label}"的选项为空，将返回原值')
+            logging.warning('%s 类型字段"%s"的选项为空，将返回原值', cls.__name__, field_meta.label)
             return parsed
 
         if parsed in field_meta.options_id_map:

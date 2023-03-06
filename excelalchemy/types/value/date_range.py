@@ -89,11 +89,11 @@ class DateRange(ComplexABCValueType):
     @classmethod
     def __validate__(
         cls,
-        v: dict[str, DateTime | None] | Any,
+        value: dict[str, DateTime | None] | Any,
         field_meta: FieldMetaInfo,
     ) -> 'DateRange':
         try:
-            parsed = DateRange.parse_obj(v)
+            parsed = DateRange.parse_obj(value)
             parsed.start = parsed.start.replace(tzinfo=field_meta.timezone) if parsed.start else parsed.start
             parsed.end = parsed.end.replace(tzinfo=field_meta.timezone) if parsed.end else parsed.end
         except Exception as exc:

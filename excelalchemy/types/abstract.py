@@ -38,12 +38,12 @@ class ABCValueType(ABC):
         """用于把 pandas 读取的 Excel 之后的数据，转回用户可识别的数据, 处理聚合之前的数据"""
 
     @classmethod
-    def __wrapped_validate__(cls, v: Any, field: ModelField) -> Any:
-        return cls.__validate__(v, field.field_info)
+    def __wrapped_validate__(cls, value: Any, field: ModelField) -> Any:
+        return cls.__validate__(value, field.field_info)
 
     @classmethod
     @abstractmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         """验证用户输入的值是否符合约束. 接收 serialize 后的值"""
 
     @classmethod
@@ -94,8 +94,8 @@ class SystemReserved(ABCValueType):
         return value
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
-        return v
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
+        return value
 
 
 class Undefined(ABCValueType):
@@ -114,5 +114,5 @@ class Undefined(ABCValueType):
         return value
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
-        return v
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
+        return value

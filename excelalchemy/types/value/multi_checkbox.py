@@ -12,18 +12,20 @@ class MultiCheckbox(ABCValueType, list[str]):
     __name__ = '复选框组'
 
     @classmethod
-    def comment(cls, field: FieldMetaInfo) -> str:
+    def comment(cls, field_meta: FieldMetaInfo) -> str:
         # Determine whether the field is required or optional
-        required_str = '必填' if field.required else '非必填'
+        required_str = '必填' if field_meta.required else '非必填'
 
         # Join available options into a string with the separator MULTI_CHECKBOX_SEPARATOR
-        options = MULTI_CHECKBOX_SEPARATOR.join(x.name for x in (field.options or []))
+        options = MULTI_CHECKBOX_SEPARATOR.join(x.name for x in (field_meta.options or []))
 
         # Set 'is_multi' to always be '多选'
         is_multi = '多选'
 
         # Add a hint message and the multi-select separator if the field is multi-select
-        hint = (field.hint or '') + (f'多选时，请用“{MULTI_CHECKBOX_SEPARATOR}”连接多个选项，如“选项1，选项2”' if field.options else '')
+        hint = (field_meta.hint or '') + (
+            f'多选时，请用“{MULTI_CHECKBOX_SEPARATOR}”连接多个选项，如“选项1，选项2”' if field_meta.options else ''
+        )
 
         # Combine the four pieces of information into a formatted string
         comment = f"""必填性：{required_str}
@@ -34,7 +36,7 @@ class MultiCheckbox(ABCValueType, list[str]):
         return comment
 
     @classmethod
-    def serialize(cls, value: str | Any, field: FieldMetaInfo) -> list[str] | str:
+    def serialize(cls, value: str | Any, field_meta: FieldMetaInfo) -> list[str] | str:
         # If the value is a list, convert all items to strings and strip whitespace
         if isinstance(value, list):
             return [str(item).strip() for item in value]
@@ -48,8 +50,8 @@ class MultiCheckbox(ABCValueType, list[str]):
         return value
 
     @classmethod
-    def __validate__(cls, v: list[str] | Any, field_meta: FieldMetaInfo) -> list[str]:  # OptionId
-        if not isinstance(v, list):
+    def __validate__(cls, value: list[str] | Any, field_meta: FieldMetaInfo) -> list[str]:  # OptionId
+        if not isinstance(value, list):
             raise ValueError('选项不存在，请参照表头的注释填写')
 
         if field_meta.options is None:
@@ -57,14 +59,14 @@ class MultiCheckbox(ABCValueType, list[str]):
 
         if not field_meta.options:  # empty
             logging.warning('类型【%s】的字段【%s】的选项为空, 将返回原值', cls.__name__, field_meta.label)
-            return v
+            return value
 
-        if len(v) != len(set(v)):
+        if len(value) != len(set(value)):
             raise ValueError('选项有重复')
 
         errors: list[str] = []
         result: list[str] = []
-        for name in v:
+        for name in value:
             option = field_meta.options_name_map.get(name)
             if option is None:
                 errors.append('选项不存在，请参照表头的注释填写')

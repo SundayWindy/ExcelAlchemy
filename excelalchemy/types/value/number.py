@@ -27,7 +27,7 @@ def transform_decimal(value: Decimal | int | float | None) -> float | int | None
     if value is None:
         return None
 
-    if isinstance(value, int | float):
+    if isinstance(value, (int, float)):
         return value
 
     if not isinstance(value, Decimal):

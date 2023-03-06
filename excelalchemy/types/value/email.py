@@ -8,7 +8,7 @@ from excelalchemy.types.value.string import String
 
 class Email(String):
     @classmethod
-    def __validate__(cls, value: Any, field: FieldMetaInfo) -> str:
+    def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> str:
         # Try to parse the value as a string
         try:
             parsed = str(value)

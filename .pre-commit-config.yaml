@@ -19,9 +19,6 @@ repos:
     - id: mccabe-complexity
       name: Check functions complexity
       language: python
-    - id: test-naming
-      name: Check if tests named appropriately
-      language: python
     - id: line-count
       name: Check number of lines in python files
       language: python
@@ -31,7 +28,6 @@ repos:
     rev: 23.1.0
     hooks:
     - id: black
-      args: [--line-length=120]
 
   - repo: local
     hooks:
@@ -50,13 +46,14 @@ repos:
     rev: v2.16.2
     hooks:
     - id: pylint
+      args:
+        - --load-plugins pylint_pydantic
 
   - repo: https://github.com/asottile/reorder_python_imports
     rev: v3.9.0
     hooks:
     - id: reorder-python-imports
       name: Reorder imports
-      entry: python -m reorder_python_imports --application-directories . --py3-plus
       pass_filenames: false
 
   - repo: local

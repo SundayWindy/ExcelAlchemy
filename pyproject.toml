@@ -84,8 +84,14 @@ ignore-paths = [
     ".mypy_cache/",
     "__pycache__/",
     ".pytest_cache/",
+    "tests/",
+    "dist/",
 ]
-extension-pkg-whitelist = ["pydantic"]
+extension-pkg-whitelist = [
+    "pydantic",
+    "pandas",
+
+]
 
 
 [tool.black]

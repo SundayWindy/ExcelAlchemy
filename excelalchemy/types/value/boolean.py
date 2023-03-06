@@ -1,6 +1,6 @@
 import logging
-from typing import Any
 from typing import TYPE_CHECKING
+from typing import Any
 
 from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.field import FieldMetaInfo

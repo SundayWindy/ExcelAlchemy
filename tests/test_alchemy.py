@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from excelalchemy import ExcelAlchemy
 from excelalchemy import ExporterConfig
 from excelalchemy import FieldMeta
-from excelalchemy import ImportMode
 from excelalchemy import ImporterConfig
+from excelalchemy import ImportMode
 from excelalchemy import Key
 from excelalchemy import Number
 from excelalchemy import NumberRange

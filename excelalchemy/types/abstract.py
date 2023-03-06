@@ -22,19 +22,19 @@ class ABCValueType(ABC):
 
     @classmethod
     @abstractmethod
-    def comment(cls, field_meta: 'FieldMetaInfo') -> str:
+    def comment(cls, field_meta: FieldMetaInfo) -> str:
         """用于渲染 Excel 表头的注释"""
 
     @classmethod
     @abstractmethod
-    def serialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:  # value is always not None
+    def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:  # value is always not None
         """用于把用户填入 Excel 的数据，转换成后端代码入口可接收的数据
         如果转换失败，返回原值，用户后续捕获更准确的错误
         """
 
     @classmethod
     @abstractmethod
-    def deserialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def deserialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         """用于把 pandas 读取的 Excel 之后的数据，转回用户可识别的数据, 处理聚合之前的数据"""
 
     @classmethod
@@ -43,7 +43,7 @@ class ABCValueType(ABC):
 
     @classmethod
     @abstractmethod
-    def __validate__(cls, v: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
         """验证用户输入的值是否符合约束. 接收 serialize 后的值"""
 
     @classmethod
@@ -56,12 +56,12 @@ class ComplexABCValueType(ABCValueType, dict):  # pyright: reportMissingTypeArgu
 
     @classmethod
     @abstractmethod
-    def comment(cls, field_meta: 'FieldMetaInfo') -> str:
+    def comment(cls, field_meta: FieldMetaInfo) -> str:
         """用于渲染 Excel 表头的注释"""
 
     @classmethod
     @abstractmethod
-    def serialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         """用于把用户填入 Excel 的数据，转换成后端代码入口可接收的数据
         如果转换失败，返回原值，用户后续捕获更准确的错误
         serialize 是聚合之后的数据
@@ -69,12 +69,12 @@ class ComplexABCValueType(ABCValueType, dict):  # pyright: reportMissingTypeArgu
 
     @classmethod
     @abstractmethod
-    def deserialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def deserialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         """用于把 pandas 读取的 Excel 之后的数据，转回用户可识别的数据, 处理聚合之前的数据"""
 
     @classmethod
     @abstractmethod
-    def model_items(cls) -> list[tuple[Key, 'FieldMetaInfo']]:
+    def model_items(cls) -> list[tuple[Key, FieldMetaInfo]]:
         """用于获取模型的所有字段名"""
 
 
@@ -82,19 +82,19 @@ class SystemReserved(ABCValueType):
     __name__ = 'SystemReserved'
 
     @classmethod
-    def comment(cls, field_meta: 'FieldMetaInfo') -> str:
+    def comment(cls, field_meta: FieldMetaInfo) -> str:
         return ''
 
     @classmethod
-    def serialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         return value
 
     @classmethod
-    def deserialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def deserialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         return value
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
         return v
 
 
@@ -102,17 +102,17 @@ class Undefined(ABCValueType):
     __name__ = 'Undefined'
 
     @classmethod
-    def comment(cls, field_meta: 'FieldMetaInfo') -> str:
+    def comment(cls, field_meta: FieldMetaInfo) -> str:
         return ''
 
     @classmethod
-    def serialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         return value
 
     @classmethod
-    def deserialize(cls, value: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def deserialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:
         return value
 
     @classmethod
-    def __validate__(cls, v: Any, field_meta: 'FieldMetaInfo') -> Any:
+    def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> Any:
         return v

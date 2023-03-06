@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 import pendulum
+
 # pyright: reportPrivateImportUsage=false
 from pendulum import DateTime
 from pydantic import BaseModel

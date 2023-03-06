@@ -53,7 +53,7 @@ class MultiStaff(MultiCheckbox):
 
     @classmethod
     def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
-        return super().__validate(v, field_meta)
+        return super().__validate__(v, field_meta)
 
     @classmethod
     def deserialize(cls, value: str | list[OptionId] | Any, field_meta: FieldMetaInfo) -> Any:
@@ -63,15 +63,27 @@ class MultiStaff(MultiCheckbox):
         if isinstance(value, list):
             if len(value) != len(set(value)):
                 raise ValueError('选项有重复')
-            rst: list[str] = []
-            for id_ in value:
-                id_ = OptionId(id_)
-                try:
-                    rst.append(field_meta.options_id_map[id_].name)
-                except KeyError:
-                    logging.warning('无法找到人员 %s 的选项, 返回原值', id_)
-                    rst.append(id_)
-            return f'{MULTI_CHECKBOX_SEPARATOR}'.join(rst)
+
+            option_names = cls.__option_ids_to_names__(value, field_meta)
+            return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
 
         logging.warning('%s 反序列化失败', cls.__name__)
         return value
+
+    @staticmethod
+    def __option_ids_to_names__(option_ids: list[OptionId], field_meta: FieldMetaInfo) -> list[str]:
+        options = field_meta.options or []
+        option_names = []
+
+        for option_id in option_ids:
+            option_id = OptionId(option_id)
+
+            try:
+                option = next(option for option in options if option.id == option_id)
+                option_names.append(option.name)
+
+            except StopIteration:
+                logging.warning(f'找不到选项id {option_id}，将返回原值')
+                option_names.append(option_id)
+
+        return option_names

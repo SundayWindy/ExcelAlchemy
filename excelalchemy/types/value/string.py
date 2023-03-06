@@ -26,17 +26,17 @@ def _is_chinese_character(character: str) -> bool:
     # CJK Compatibility Ideographs Supplement 2F800–2FA1F Unifiable variant
     code_point = ord(character)
     return (
-            (0x4E00 <= code_point <= 0x9FFF)
-            or (0x3400 <= code_point <= 0x4DBF)
-            or (0x20000 <= code_point <= 0x2A6DF)
-            or (0x2A700 <= code_point <= 0x2B73F)
-            or (0x2B740 <= code_point <= 0x2B81F)
-            or (0x2B820 <= code_point <= 0x2CEAF)
-            or (0x2CEB0 <= code_point <= 0x2EBEF)
-            or (0x30000 <= code_point <= 0x3134F)
-            or (0x31350 <= code_point <= 0x323AF)
-            or (0xF900 <= code_point <= 0xFAFF)
-            or (0x2F800 <= code_point <= 0x2FA1F)
+        (0x4E00 <= code_point <= 0x9FFF)
+        or (0x3400 <= code_point <= 0x4DBF)
+        or (0x20000 <= code_point <= 0x2A6DF)
+        or (0x2A700 <= code_point <= 0x2B73F)
+        or (0x2B740 <= code_point <= 0x2B81F)
+        or (0x2B820 <= code_point <= 0x2CEAF)
+        or (0x2CEB0 <= code_point <= 0x2EBEF)
+        or (0x30000 <= code_point <= 0x3134F)
+        or (0x31350 <= code_point <= 0x323AF)
+        or (0xF900 <= code_point <= 0xFAFF)
+        or (0x2F800 <= code_point <= 0x2FA1F)
     )
 
 
@@ -101,7 +101,6 @@ class String(str, ABCValueType):
     def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
         return str(value).strip() if value is not None else ''
 
-
     @classmethod
     def __validate__(cls, v: str, field_meta: FieldMetaInfo) -> str:
         try:
@@ -127,4 +126,3 @@ class String(str, ABCValueType):
             raise ValueError(*errors)
         else:
             return parsed
-

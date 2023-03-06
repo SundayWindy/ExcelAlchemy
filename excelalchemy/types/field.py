@@ -12,14 +12,14 @@ from pydantic.fields import FieldInfo
 from pydantic.fields import Undefined as PydanticUndefined
 from pydantic.typing import NoArgAnyCallable
 
-from excelalchemy.const import DEFAULT_FIELD_META_ORDER
-from excelalchemy.const import MAX_OPTIONS_COUNT
-from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
 from excelalchemy.const import CharacterSet
+from excelalchemy.const import DEFAULT_FIELD_META_ORDER
 from excelalchemy.const import DataRangeOption
 from excelalchemy.const import DateFormat
 from excelalchemy.const import IntStr
+from excelalchemy.const import MAX_OPTIONS_COUNT
 from excelalchemy.const import Option
+from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
 from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.abstract import Undefined
 from excelalchemy.types.identity import Key
@@ -239,6 +239,19 @@ class FieldMetaInfo(FieldInfo):
                 len(self.options),
             )
         return {option.name: option for option in self.options}
+
+    def __option_ids_to_names__(self, option_ids: list[str]) -> list[str]:
+        option_names = []
+
+        for option_id in option_ids:
+            option_id = OptionId(option_id)
+            try:
+                option_names.append(self.options_id_map[option_id].name)
+            except KeyError:
+                logging.warning(f'找不到选项id {option_id}，将返回原值')
+                option_names.append(option_id)
+
+        return option_names
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.label})'

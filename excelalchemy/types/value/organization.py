@@ -3,7 +3,6 @@ from typing import Any
 
 from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
 from excelalchemy.types.field import FieldMetaInfo
-from excelalchemy.types.identity import OptionId
 from excelalchemy.types.value.multi_checkbox import MultiCheckbox
 from excelalchemy.types.value.radio import Radio
 
@@ -55,23 +54,11 @@ class MultiOrganization(MultiCheckbox):
             return value
 
         if isinstance(value, list):
-            option_names = cls.__option_ids_to_names__(value, field_meta)
+            option_names = field_meta.__option_ids_to_names__(value)
             return MULTI_CHECKBOX_SEPARATOR.join(map(str, option_names))
 
         logging.warning('%s 反序列化失败', cls.__name__)
         return value
-
-    @staticmethod
-    def __option_ids_to_names__(option_ids: list[str], field_meta: FieldMetaInfo) -> list[str]:
-        option_names: list[str] = []
-        for option_id in option_ids:
-            option_id = OptionId(option_id)
-            try:
-                option_names.append(field_meta.options_id_map[option_id].name)
-            except KeyError:
-                logging.warning('无法找到组织 %s 的选项, 返回原值', option_id)
-                option_names.append(option_id)
-        return option_names
 
     @classmethod
     def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> list[str]:

@@ -1,9 +1,7 @@
 import logging
 from typing import Any
 
-from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
 from excelalchemy.types.field import FieldMetaInfo
-from excelalchemy.types.identity import OptionId
 from excelalchemy.types.value.multi_checkbox import MultiCheckbox
 from excelalchemy.types.value.radio import Radio
 
@@ -48,28 +46,4 @@ class MultiTreeNode(MultiCheckbox):
 
     @classmethod
     def __validate__(cls, v: Any, field_meta: FieldMetaInfo) -> list[str]:
-        return super().__validate(v, field_meta)
-
-    @classmethod
-    def deserialize(cls, value: str | list[str] | None | Any, field_meta: FieldMetaInfo) -> str | Any:
-        if value is None or value == '':
-            return ''
-        if isinstance(value, str):
-            return value
-
-        if isinstance(value, list):
-            if len(value) != len(set(value)):
-                raise ValueError('选项有重复')
-            rst: list[str] = []
-            for id_ in value:
-                id_ = OptionId(id_)
-                try:
-                    rst.append(field_meta.options_id_map[id_].name)
-                except KeyError:
-                    logging.warning('无法找到树结点 %s 的选项, 返回原值', id_)
-                    rst.append(id_)
-            # pyright: reportUnknownArgumentType=false
-            return f'{MULTI_CHECKBOX_SEPARATOR}'.join(rst)
-
-        logging.warning('%s 反序列化失败', cls.__name__)
-        return value
+        return super().__validate__(v, field_meta)

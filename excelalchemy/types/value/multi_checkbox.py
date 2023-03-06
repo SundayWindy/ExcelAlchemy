@@ -84,15 +84,8 @@ class MultiCheckbox(ABCValueType, list[str]):
             case str():
                 return value
             case list():
-                rst: list[str] = []
-                # pyright: reportUnknownArgumentType=false
-                for id_ in value:
-                    try:
-                        rst.append(field_meta.options_id_map[id_].name)
-                    except KeyError:
-                        logging.warning('类型【%s】无法为【%s】找到【%s】的选项, 返回原值', cls.__name__, field_meta.label, value)
-                        rst.append(id_)
-                return f'{MULTI_CHECKBOX_SEPARATOR}'.join(rst)
+                option_names = field_meta.__option_ids_to_names__(value)
+                return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
 
         logging.warning('%s 反序列化失败', cls.__name__)
         return value if value is not None else ''

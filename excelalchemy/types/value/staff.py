@@ -64,26 +64,8 @@ class MultiStaff(MultiCheckbox):
             if len(value) != len(set(value)):
                 raise ValueError('选项有重复')
 
-            option_names = cls.__option_ids_to_names__(value, field_meta)
+            option_names = field_meta.__option_ids_to_names__(value)
             return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
 
         logging.warning('%s 反序列化失败', cls.__name__)
         return value
-
-    @staticmethod
-    def __option_ids_to_names__(option_ids: list[OptionId], field_meta: FieldMetaInfo) -> list[str]:
-        options = field_meta.options or []
-        option_names = []
-
-        for option_id in option_ids:
-            option_id = OptionId(option_id)
-
-            try:
-                option = next(option for option in options if option.id == option_id)
-                option_names.append(option.name)
-
-            except StopIteration:
-                logging.warning(f'找不到选项id {option_id}，将返回原值')
-                option_names.append(option_id)
-
-        return option_names

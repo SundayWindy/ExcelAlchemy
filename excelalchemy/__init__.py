@@ -11,8 +11,8 @@ from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ProgrammaticError
 from excelalchemy.helper.pydantic import extract_pydantic_model
 from excelalchemy.types.alchemy import ExporterConfig
-from excelalchemy.types.alchemy import ImporterConfig
 from excelalchemy.types.alchemy import ImportMode
+from excelalchemy.types.alchemy import ImporterConfig
 from excelalchemy.types.field import FieldMeta
 from excelalchemy.types.field import PatchFieldMeta
 from excelalchemy.types.identity import ColumnIndex

@@ -2,8 +2,8 @@ import base64
 import io
 from datetime import timedelta
 from tempfile import TemporaryFile
-from typing import IO
 from typing import Any
+from typing import IO
 
 import pandas
 from minio import Minio

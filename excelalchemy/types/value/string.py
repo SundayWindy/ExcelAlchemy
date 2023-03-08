@@ -86,10 +86,7 @@ class String(str, ABCValueType):
         character_set = '中文、数字、大写字母、小写字母、符号'
         extra_hint = field_meta.hint
 
-        return f"""唯一性：{unique}
-                必填性：{required}
-                最大长度：{max_length}
-                可输入内容：{character_set}""" + (
+        return f"""唯一性：{unique}\n必填性：{required}\n最大长度：{max_length}\n可输入内容：{character_set}""" + (
             f'\n提示：{extra_hint}' if extra_hint else ''
         )
 

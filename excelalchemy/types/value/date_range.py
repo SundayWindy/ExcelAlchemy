@@ -59,9 +59,7 @@ class DateRange(ComplexABCValueType):
         date_hint = DATE_FORMAT_TO_HINT_MAPPING[field_meta.date_format]
         extra_hint = f', {field_meta.hint}' if field_meta.hint else ''
 
-        return f'''必填性：{required_str}
-        格式：日期（{date_hint}）
-        提示：开始日期不得晚于结束日期{extra_hint}'''
+        return f'''必填性：{required_str}\n格式：日期（{date_hint}）\n提示：开始日期不得晚于结束日期{extra_hint}'''
 
     @classmethod
     def serialize(cls, value: dict[str, str] | Any, field_meta: FieldMetaInfo) -> dict[str, DateTime | None] | Any:

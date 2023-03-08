@@ -29,11 +29,7 @@ class Date(ABCValueType, datetime):
         range_hint = DATA_RANGE_OPTION_TO_CHINESE[date_range_option] if date_range_option else '无限制'
         extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
 
-        return f"""必填性：{required_str}
-                格式：日期（{date_hint}）
-                范围：{range_hint}
-                {extra_hint}
-                """
+        return f"""必填性：{required_str}\n格式：日期（{date_hint}）\n范围：{range_hint}{extra_hint}"""
 
     @classmethod
     def serialize(cls, value: str | DateTime | Any, field_meta: FieldMetaInfo) -> datetime | Any:

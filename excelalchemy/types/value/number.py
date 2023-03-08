@@ -51,11 +51,7 @@ class Number(Decimal, ABCValueType):
         range_ = cls.__get_range_description__(field_meta)
 
         return (
-            f"""必填性：{required}
-            格式：{format_}
-            小数位数：{field_meta.fraction_digits}
-            可输入范围：{range_}
-            单位：{unit}"""
+            f"""必填性：{required}\n格式：{format_}\n小数位数：{field_meta.fraction_digits or 0}\n可输入范围：{range_}\n单位：{unit}"""
             + extra_hint
         )
 
@@ -85,11 +81,13 @@ class Number(Decimal, ABCValueType):
             case (None, None):
                 return '无限制'
             case (_, None):
-                return f'≥ {field_meta.importer_ge}'
-            case (None, _):
                 return f'≤ {field_meta.importer_le}'
+            case (None, _):
+                return f'≥ {field_meta.importer_ge}'
             case (le, ge):
                 return f'{ge}～{le}'
+            case _:
+                return '无限制'
 
     @staticmethod
     def __maybe_decimal__(value: Any) -> Decimal | None:

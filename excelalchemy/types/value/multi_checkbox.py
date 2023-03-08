@@ -28,10 +28,7 @@ class MultiCheckbox(ABCValueType, list[str]):
         )
 
         # Combine the four pieces of information into a formatted string
-        comment = f"""必填性：{required_str}
-                      选项：{options}
-                      单/多选：{is_multi}
-                      提示：{hint}"""
+        comment = f"""必填性：{required_str}\n选项：{options}\n单/多选：{is_multi}\n提示：{hint}"""
 
         return comment
 

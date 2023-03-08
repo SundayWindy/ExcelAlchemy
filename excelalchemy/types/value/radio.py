@@ -19,9 +19,7 @@ class Radio(ABCValueType, str):
         if not options:
             logging.error('%s 类型的字段 %s 必须设置 options', cls.__name__, field_meta.label)
         extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
-        return f"""必填性：{required}
-                选项：{options}
-                单/多选：{is_multi}{extra_hint}"""
+        return f"""必填性：{required}\n选项：{options}\n单/多选：{is_multi}{extra_hint}"""
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> str:

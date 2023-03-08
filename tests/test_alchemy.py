@@ -181,8 +181,8 @@ class TestExcelAlchemy(IsolatedAsyncioTestCase):
                 exporter_model=ThingCreateFailedImporter,
             )
         )
-        download_result = alchemy.export_excel(
-            output_excel_name='导出数据.xlsx',
+        download_result = alchemy.export_upload(
+            output_name='导出数据.xlsx',
             data=cast(
                 list[dict[Key, Any]],
                 [

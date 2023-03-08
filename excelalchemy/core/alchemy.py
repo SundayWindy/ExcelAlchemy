@@ -196,7 +196,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             fail_count=fail_count,
         )
 
-    def export_excel_data(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> Base64Str:
+    def export(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> Base64Str:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
         assert isinstance(self.config, ExporterConfig)  # only for type check
 
@@ -222,11 +222,11 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             has_merged_header=has_merged_header,
         )
 
-    def export_excel(self, output_excel_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> bool:
+    def export_upload(self, output_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> bool:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
 
-        content_with_prefix = self.export_excel_data(data, keys)
-        url = self._upload_file(output_excel_name, content_with_prefix)
+        content_with_prefix = self.export(data, keys)
+        url = self._upload_file(output_name, content_with_prefix)
         return url is not None
 
     def add_context(self, context: ContextT) -> None:
@@ -331,13 +331,13 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
         return content_with_prefix
 
-    def _upload_file(self, output_excel_name: str, content_with_prefix: str) -> str:
+    def _upload_file(self, output_name: str, content_with_prefix: str) -> str:
         """上传文件"""
         assert isinstance(self.config, (ExporterConfig, ImporterConfig))  # only for type check
         url = upload_file_from_minio_object(
             self.config.minio,
             self.config.bucket_name,
-            output_excel_name,
+            output_name,
             remove_excel_prefix(content_with_prefix),
             self.config.url_expires,
         )

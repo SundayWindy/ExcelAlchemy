@@ -13,13 +13,10 @@ class Radio(ABCValueType, str):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '非必填'
-        options = f'{MULTI_CHECKBOX_SEPARATOR}'.join([x.name for x in (field_meta.options or [])])
-        is_multi = '单选'
-        if not options:
+        if not field_meta.options:
             logging.error('%s 类型的字段 %s 必须设置 options', cls.__name__, field_meta.label)
-        extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
-        return f"""必填性：{required}\n选项：{options}\n单/多选：{is_multi}{extra_hint}"""
+
+        return '\n'.join([field_meta.comment_required, field_meta.comment_options, '单/多选：单选', field_meta.comment_hint])
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> str:

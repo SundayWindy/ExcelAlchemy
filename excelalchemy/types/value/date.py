@@ -20,16 +20,16 @@ class Date(ABCValueType, datetime):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required_str = '必填' if field_meta.required else '选填'
-        date_format = field_meta.date_format
-        if not date_format:
+        if not field_meta.date_format:
             raise RuntimeError('日期格式未定义')
-        date_hint = DATE_FORMAT_TO_HINT_MAPPING[date_format]
-        date_range_option = field_meta.date_range_option
-        range_hint = DATA_RANGE_OPTION_TO_CHINESE[date_range_option] if date_range_option else '无限制'
-        extra_hint = f'\n提示：{field_meta.hint}' if field_meta.hint else ''
-
-        return f"""必填性：{required_str}\n格式：日期（{date_hint}）\n范围：{range_hint}{extra_hint}"""
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                field_meta.comment_date_format,
+                field_meta.comment_date_range_option,
+                field_meta.comment_hint,
+            ]
+        )
 
     @classmethod
     def serialize(cls, value: str | DateTime | Any, field_meta: FieldMetaInfo) -> datetime | Any:

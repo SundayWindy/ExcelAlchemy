@@ -37,9 +37,12 @@ class MultiOrganization(MultiCheckbox):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '非必填'
-        extra_hint = field_meta.hint or '需按照组织架构树填写组织完整路径，如“XX公司/一级部门/二级部门”，多选时，选项之间用“、”连接'
-        return f"""必填性：{required} \n提示：{extra_hint}"""
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                f'提示：{field_meta.hint or "需按照组织架构树填写组织完整路径，如“XX公司/一级部门/二级部门”，多选时，选项之间用“、”连接"}',
+            ]
+        )
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> Any:

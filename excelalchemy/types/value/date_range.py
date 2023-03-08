@@ -52,14 +52,16 @@ class DateRange(ComplexABCValueType):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required_str = '必填' if field_meta.required else '选填'
         if field_meta.date_format is None:
             raise RuntimeError('日期格式未定义')
 
-        date_hint = DATE_FORMAT_TO_HINT_MAPPING[field_meta.date_format]
-        extra_hint = f', {field_meta.hint}' if field_meta.hint else ''
-
-        return f'''必填性：{required_str}\n格式：日期（{date_hint}）\n提示：开始日期不得晚于结束日期{extra_hint}'''
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                field_meta.comment_date_format,
+                f'提示：开始日期不得晚于结束日期{field_meta.hint}',
+            ]
+        )
 
     @classmethod
     def serialize(cls, value: dict[str, str] | Any, field_meta: FieldMetaInfo) -> dict[str, DateTime | None] | Any:

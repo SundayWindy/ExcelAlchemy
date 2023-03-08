@@ -12,7 +12,12 @@ from pydantic.fields import FieldInfo
 from pydantic.fields import Undefined as PydanticUndefined
 from pydantic.typing import NoArgAnyCallable
 
-from excelalchemy.const import DEFAULT_FIELD_META_ORDER
+from excelalchemy.const import (
+    DEFAULT_FIELD_META_ORDER,
+    DATE_FORMAT_TO_HINT_MAPPING,
+    DATA_RANGE_OPTION_TO_CHINESE,
+    MULTI_CHECKBOX_SEPARATOR,
+)
 from excelalchemy.const import MAX_OPTIONS_COUNT
 from excelalchemy.const import UNIQUE_HEADER_CONNECTOR
 from excelalchemy.const import CharacterSet
@@ -198,6 +203,19 @@ class FieldMetaInfo(FieldInfo):
         if (self.is_primary_key or self.unique) and self.required is False:
             raise ValueError('主键或唯一字段必须必填')
 
+    def exchange_option_ids_to_names(self, option_ids: list[str]) -> list[str]:
+        option_names = []
+
+        for option_id in option_ids:
+            option_id = OptionId(option_id)
+            try:
+                option_names.append(self.options_id_map[option_id].name)
+            except KeyError:
+                logging.warning('找不到选项id %s，将返回原值', option_id)
+                option_names.append(option_id)
+
+        return option_names
+
     @property
     def unique_label(self) -> UniqueLabel:
         if self.parent_label is None:
@@ -240,18 +258,49 @@ class FieldMetaInfo(FieldInfo):
             )
         return {option.name: option for option in self.options}
 
-    def exchange_option_ids_to_names(self, option_ids: list[str]) -> list[str]:
-        option_names = []
+    @property
+    def comment_required(self) -> str:
+        return f"必填性：{'必填' if self.required else '选填'}"
 
-        for option_id in option_ids:
-            option_id = OptionId(option_id)
-            try:
-                option_names.append(self.options_id_map[option_id].name)
-            except KeyError:
-                logging.warning('找不到选项id %s，将返回原值', option_id)
-                option_names.append(option_id)
+    @property
+    def comment_date_format(self) -> str:
+        if self.date_format is None:
+            return ''
+        return f'格式：日期（{DATE_FORMAT_TO_HINT_MAPPING[self.date_format]}）'
 
-        return option_names
+    @property
+    def comment_date_range_option(self) -> str:
+        if self.date_range_option is None:
+            return '范围：无限制'
+        return f'范围：{DATA_RANGE_OPTION_TO_CHINESE[self.date_range_option]}'
+
+    @property
+    def comment_hint(self) -> str:
+        if self.hint is None:
+            return ''
+        return f'提示：{self.hint}'
+
+    @property
+    def comment_options(self) -> str:
+        if self.options is None:
+            return ''
+        return f'选项：{MULTI_CHECKBOX_SEPARATOR.join(x.name for x in self.options)}'
+
+    @property
+    def comment_fraction_digits(self) -> str:
+        return f'小数位数：{self.fraction_digits or 0}'
+
+    @property
+    def comment_unit(self) -> str:
+        return f'单位：{self.unit or "无"}'
+
+    @property
+    def comment_unique(self) -> str:
+        return f"唯一性：{'唯一' if self.unique else '非唯一'}"
+
+    @property
+    def comment_max_length(self) -> str:
+        return f'最大长度：{self.max_length}' or '无限制'
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.label})'

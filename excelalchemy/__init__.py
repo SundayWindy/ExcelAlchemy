@@ -1,6 +1,6 @@
 """A Python Library for Reading and Writing Excel Files"""
 
-__version__ = '0.1.0a4'
+__version__ = '0.1.0a5'
 
 from excelalchemy.const import CharacterSet
 from excelalchemy.const import DataRangeOption

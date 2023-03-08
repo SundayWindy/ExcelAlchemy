@@ -623,6 +623,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
         agg_data: dict[Key, Any] = {}
         for unique_label, value in row_data.items():
             field_meta = self.unique_label_to_field_meta[unique_label]
+
             if field_meta.key is None or field_meta.parent_key is None:
                 raise RuntimeError(f' {type(field_meta).__name__} 未配置 key/parent_key')
 

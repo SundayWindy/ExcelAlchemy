@@ -13,19 +13,12 @@ class Boolean(ABCValueType):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '选填'
-
-        if field_meta.hint:
-            extra_hint = f'提示: {field_meta.hint}'
-        else:
-            extra_hint = ''
-
-        comment = f'必填性: {required}\n可选值: 是、否'
-
-        if extra_hint:
-            comment += f'\n{extra_hint}'
-
-        return comment
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                field_meta.comment_hint,
+            ]
+        )
 
     @classmethod
     def serialize(cls, value: Any, field_meta: FieldMetaInfo) -> str:

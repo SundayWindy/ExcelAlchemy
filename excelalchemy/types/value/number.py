@@ -44,15 +44,14 @@ class Number(Decimal, ABCValueType):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '非必填'
-        unit = field_meta.unit or '无'
-        extra_hint = f'提示：{field_meta.hint}' if field_meta.hint else ''
-        format_ = '数值'
-        range_ = cls.__get_range_description__(field_meta)
-
-        return (
-            f"""必填性：{required}\n格式：{format_}\n小数位数：{field_meta.fraction_digits or 0}\n可输入范围：{range_}\n单位：{unit}"""
-            + extra_hint
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                '格式：数值',
+                field_meta.comment_fraction_digits,
+                f'可输入范围：{cls.__get_range_description__(field_meta)}',
+                field_meta.comment_unit,
+            ]
         )
 
     @classmethod

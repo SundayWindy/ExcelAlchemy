@@ -80,14 +80,14 @@ def _format_character_set_names(cs: set[CharacterSet]) -> str:
 class String(str, ABCValueType):
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        unique = '唯一' if field_meta.unique else '非唯一'
-        required = '必填' if field_meta.required else '非必填'
-        max_length = field_meta.importer_max_length or '无限制'
-        character_set = '中文、数字、大写字母、小写字母、符号'
-        extra_hint = field_meta.hint
-
-        return f"""唯一性：{unique}\n必填性：{required}\n最大长度：{max_length}\n可输入内容：{character_set}""" + (
-            f'\n提示：{extra_hint}' if extra_hint else ''
+        return '\n'.join(
+            [
+                field_meta.comment_unique,
+                field_meta.comment_required,
+                field_meta.comment_max_length,
+                '可输入内容:中文、数字、大写字母、小写字母、符号',
+                field_meta.comment_hint,
+            ]
         )
 
     @classmethod

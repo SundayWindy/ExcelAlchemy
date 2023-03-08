@@ -13,24 +13,14 @@ class MultiCheckbox(ABCValueType, list[str]):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        # Determine whether the field is required or optional
-        required_str = '必填' if field_meta.required else '非必填'
-
-        # Join available options into a string with the separator MULTI_CHECKBOX_SEPARATOR
-        options = MULTI_CHECKBOX_SEPARATOR.join(x.name for x in (field_meta.options or []))
-
-        # Set 'is_multi' to always be '多选'
-        is_multi = '多选'
-
-        # Add a hint message and the multi-select separator if the field is multi-select
-        hint = (field_meta.hint or '') + (
-            f'多选时，请用“{MULTI_CHECKBOX_SEPARATOR}”连接多个选项，如“选项1，选项2”' if field_meta.options else ''
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                field_meta.comment_options,
+                '单/多选：多选',
+                field_meta.comment_hint,
+            ]
         )
-
-        # Combine the four pieces of information into a formatted string
-        comment = f"""必填性：{required_str}\n选项：{options}\n单/多选：{is_multi}\n提示：{hint}"""
-
-        return comment
 
     @classmethod
     def serialize(cls, value: str | Any, field_meta: FieldMetaInfo) -> list[str] | str:

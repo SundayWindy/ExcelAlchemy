@@ -39,9 +39,12 @@ class MultiStaff(MultiCheckbox):
 
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
-        required = '必填' if field_meta.required else '非必填'
-        extra_hint = field_meta.hint or '请输入人员姓名和工号，如“张三/001”'
-        return f"""必填性：{required} \n提示：{extra_hint}"""
+        return '\n'.join(
+            [
+                field_meta.comment_required,
+                f'提示：{field_meta.hint or "请输入人员姓名和工号，如“张三/001”，多选时，选项之间用“、”连接"}',
+            ]
+        )
 
     @classmethod
     def serialize(cls, value: str | list[str] | Any, field_meta: FieldMetaInfo) -> Any:

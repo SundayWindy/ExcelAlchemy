@@ -51,14 +51,7 @@ class MultiCheckbox(ABCValueType, list[str]):
         if len(value) != len(set(value)):
             raise ValueError('选项有重复')
 
-        errors: list[str] = []
-        result: list[str] = []
-        for name in value:
-            option = field_meta.options_name_map.get(name)
-            if option is None:
-                errors.append('选项不存在，请参照表头的注释填写')
-            else:
-                result.append(option.id)
+        result, errors = field_meta.exchange_names_to_option_ids_with_errors(value)
 
         if errors:
             raise ValueError(*errors)

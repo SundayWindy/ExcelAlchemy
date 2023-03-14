@@ -161,7 +161,7 @@ def _write_comment_header(
     return file
 
 
-def _write_merged_header(
+def _write_merged_header(  # pragma: no mccabe
     df: DataFrame,
     field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
     file: BinaryIO,
@@ -264,7 +264,7 @@ def _get_parsed_value(
 
 
 # pylint: disable=too-many-locals
-def _write_value_mark_error(
+def _write_value_mark_error(  # pragma: no mccabe
     df: DataFrame,
     errors: dict[RowIndex, dict[ColumnIndex, list[ExcelCellError]]],
     field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],

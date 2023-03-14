@@ -25,7 +25,15 @@ name = "excelalchemy"
 Home = "https://github.com/SundayWindy/excelalchemy"
 
 [project.optional-dependencies]
-development = ["pandas-stubs", "black", "isort", "mypy", "pylint", "pre-commit"]
+development = [
+    "pandas-stubs",
+    "black",
+    "isort",
+    "mypy",
+    "pylint",
+    "pre-commit",
+    "pyright",
+]
 
 [tool.pyright]
 exclude = [

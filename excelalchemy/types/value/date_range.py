@@ -8,7 +8,6 @@ import pendulum
 from pendulum import DateTime
 from pydantic import BaseModel
 
-from excelalchemy.const import DATE_FORMAT_TO_HINT_MAPPING
 from excelalchemy.const import DATE_FORMAT_TO_PYTHON_MAPPING
 from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.const import DataRangeOption

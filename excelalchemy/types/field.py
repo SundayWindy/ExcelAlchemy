@@ -216,6 +216,16 @@ class FieldMetaInfo(FieldInfo):
 
         return option_names
 
+    def exchange_names_to_option_ids_with_errors(self, names: list[str]) -> tuple[list[str], list[str]]:
+        errors, result = [], []
+        for name in names:
+            option = self.options_name_map.get(name)
+            if option is None:
+                errors.append('选项不存在，请参照表头的注释填写')
+            else:
+                result.append(option.id)
+        return result, errors
+
     @property
     def unique_label(self) -> UniqueLabel:
         if self.parent_label is None:

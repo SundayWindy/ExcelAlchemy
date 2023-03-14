@@ -17,7 +17,7 @@ from pandas import DataFrame
 from pandas import concat
 from pydantic import BaseModel
 
-from excelalchemy.const import DEFAULT_FIELD_META_ORDER
+from excelalchemy.const import DEFAULT_FIELD_META_ORDER, ImporterCreateModelT, ImporterUpdateModelT
 from excelalchemy.const import REASON_COLUMN_KEY
 from excelalchemy.const import REASON_COLUMN_LABEL
 from excelalchemy.const import RESULT_COLUMN_KEY
@@ -105,27 +105,16 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
     def __init_from_config__(self) -> None:
         """从配置类初始化"""
 
-        if self.excel_mode == ExcelMode.IMPORT:
-            if not isinstance(self.config, ImporterConfig):
-                raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
-            self.context = self.config.context
-            if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
-                config_importer_model = self.config.create_importer_model
-            elif self.config.import_mode == ImportMode.UPDATE:
-                config_importer_model = self.config.update_importer_model
-            else:
-                raise RuntimeError('不支持的导入模式')
-        elif self.excel_mode == ExcelMode.EXPORT:
-            if not isinstance(self.config, ExporterConfig):
-                raise TypeError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
-            config_importer_model = self.config.exporter_model
-        else:
-            raise RuntimeError('不支持的模式')
+        self.context = self.config.context
+        importer_model = self.__get_importer_model__()
+        self.__init_field_meta__(importer_model)
 
-        self.field_metas = extract_pydantic_model(config_importer_model)
+    def __init_field_meta__(self, importer_model: type[BaseModel]) -> None:
+        """从配置类初始化"""
+        self.field_metas = extract_pydantic_model(importer_model)
         self._check_field_meta_order(self.field_metas)
         if len(self.field_metas) == 0:
-            raise RuntimeError(f'没有从模型 {config_importer_model} 中提取到字段元数据，请检查模型是否定义了字段')
+            raise RuntimeError(f'没有从模型 {importer_model} 中提取到字段元数据，请检查模型是否定义了字段')
         self.ordered_field_meta: list[FieldMetaInfo] = self._sort_field_meta(self.field_metas)  # type: ignore[no-redef]
 
         for field_meta in self.ordered_field_meta:
@@ -139,6 +128,25 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             self.unique_key_to_field_meta[field_meta.unique_key] = field_meta
             self.unique_label_to_field_meta[field_meta.unique_label] = field_meta
 
+    def __get_importer_model__(self) -> type[ImporterCreateModelT | ImporterUpdateModelT]:
+        if self.excel_mode == ExcelMode.IMPORT:
+            if not isinstance(self.config, ImporterConfig):
+                raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
+            if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
+                importer_model = self.config.create_importer_model
+            elif self.config.import_mode == ImportMode.UPDATE:
+                importer_model = self.config.update_importer_model
+            else:
+                raise RuntimeError('不支持的导入模式')
+        elif self.excel_mode == ExcelMode.EXPORT:
+            if not isinstance(self.config, ExporterConfig):
+                raise TypeError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
+            importer_model = self.config.exporter_model
+        else:
+            raise RuntimeError('不支持的模式')
+
+        return importer_model
+
     @staticmethod
     def _check_field_meta_order(field_metas: list[FieldMetaInfo]) -> None:
         """检查字段顺序是否有重复"""
@@ -148,7 +156,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             order_to_field_meta[field_meta.order].add(field_meta.parent_label)
         duplicate_order = [v for k, v in order_to_field_meta.items() if len(v) > 1 and k != DEFAULT_FIELD_META_ORDER]
         if duplicate_order:
-            raise RuntimeError(f'字段顺序定义有重复：{list( itertools.chain.from_iterable(duplicate_order))}')
+            raise RuntimeError(f'字段顺序定义有重复：{list(itertools.chain.from_iterable(duplicate_order))}')
 
     def download_template(self, sample_data: list[dict[str, Any]] | None = None) -> str:
         """下载导入模版"""
@@ -620,6 +628,12 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
         """
         assert isinstance(self.config, ImporterConfig)
+        agg_data: dict[Key, Any] = self.__agg_data__(row_data)
+        serialized_agg_data: dict[Key, Any] = self.__serialize_agg_data__(agg_data)
+
+        return serialized_agg_data
+
+    def __agg_data__(self, row_data: dict[UniqueLabel, Any]) -> dict[Key, Any]:
         agg_data: dict[Key, Any] = {}
         for unique_label, value in row_data.items():
             field_meta = self.unique_label_to_field_meta[unique_label]
@@ -638,7 +652,9 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             else:
                 agg_data.setdefault(field_meta.parent_key, {})
                 agg_data[field_meta.parent_key][field_meta.key] = value
+        return agg_data
 
+    def __serialize_agg_data__(self, agg_data: dict[Key, Any]) -> dict[Key, Any]:
         serialized_agg_data: dict[Key, Any] = {}
         for parent_key, value in agg_data.items():
             field_metas = self.parent_key_to_field_metas[parent_key]

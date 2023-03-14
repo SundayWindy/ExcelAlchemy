@@ -98,6 +98,7 @@ class String(str, ABCValueType):
     def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
         return str(value).strip() if value is not None else ''
 
+    # mccabe-complexity: 12
     @classmethod
     def __validate__(cls, value: str, field_meta: FieldMetaInfo) -> str:
         try:

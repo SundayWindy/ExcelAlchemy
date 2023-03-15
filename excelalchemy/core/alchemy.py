@@ -17,7 +17,7 @@ from pandas import DataFrame
 from pandas import concat
 from pydantic import BaseModel
 
-from excelalchemy.const import DEFAULT_FIELD_META_ORDER, ImporterCreateModelT, ImporterUpdateModelT
+from excelalchemy.const import DEFAULT_FIELD_META_ORDER
 from excelalchemy.const import REASON_COLUMN_KEY
 from excelalchemy.const import REASON_COLUMN_LABEL
 from excelalchemy.const import RESULT_COLUMN_KEY
@@ -128,7 +128,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             self.unique_key_to_field_meta[field_meta.unique_key] = field_meta
             self.unique_label_to_field_meta[field_meta.unique_label] = field_meta
 
-    def __get_importer_model__(self) -> type[ImporterCreateModelT | ImporterUpdateModelT]:
+    def __get_importer_model__(self) -> type[BaseModel]:
         if self.excel_mode == ExcelMode.IMPORT:
             if not isinstance(self.config, ImporterConfig):
                 raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
@@ -235,11 +235,11 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
         content_with_prefix = self.export(data, keys)
         url = self._upload_file(output_name, content_with_prefix)
-        return url is not None
+        return True
 
     def add_context(self, context: ContextT) -> None:
         """添加转换模型上下文"""
-        if self.config is not None:
+        if self.context is not None:
             logging.warning('已经存在旧的转换模型上下文, 旧的上下文将被替换, 请确认此操作符合预期')
 
         self.context = context

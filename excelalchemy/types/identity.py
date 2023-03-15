@@ -31,3 +31,7 @@ class OptionId(str):
 
 class Base64Str(str):
     """Base64 编码的字符串"""
+
+
+class UrlStr(str):
+    """URL 字符串"""

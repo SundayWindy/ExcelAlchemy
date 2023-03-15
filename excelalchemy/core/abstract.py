@@ -7,6 +7,7 @@ from excelalchemy.const import ContextT
 from excelalchemy.const import ExcelConfigT
 from excelalchemy.types.identity import Base64Str
 from excelalchemy.types.identity import Key
+from excelalchemy.types.identity import UrlStr
 from excelalchemy.types.result import ImportResult
 
 
@@ -24,7 +25,7 @@ class ABCExcelAlchemy(ABC, Generic[ContextT, ExcelConfigT]):
         """导出数据，返回 base64 编码的 excel 文件, 字段顺序与定义的导出模型一致"""
 
     @abstractmethod
-    def export_upload(self, output_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> bool:
+    def export_upload(self, output_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> UrlStr:
         """导出数据, 自动将文件上传到 Minio，字段顺序与定义的导出模型一致"""
 
     @abstractmethod

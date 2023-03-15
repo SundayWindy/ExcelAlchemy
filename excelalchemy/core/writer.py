@@ -161,6 +161,68 @@ def _write_comment_header(
     return file
 
 
+def _write_vertically_merged_header(
+    start_row: int,
+    df: DataFrame,
+    column_write_offset: int,
+    field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
+    worksheet: Worksheet,
+):
+    for openpyxl_col_index, column in enumerate(
+        df.columns[column_write_offset:],
+        start=column_write_offset + OPENPYXL_EXCEL_INDEX_START_AT,
+    ):
+        field_meta = field_meta_mapping[column]
+        if field_meta.label == field_meta.parent_label:
+            # 如果 label 和 parent_label 相同，说明需要上下合并
+            worksheet.merge_cells(
+                start_row=start_row,
+                start_column=openpyxl_col_index + column_write_offset,
+                end_row=start_row + 1,  # +1 表示合并两行
+                end_column=openpyxl_col_index + column_write_offset,
+            )
+        worksheet.cell(
+            row=start_row,
+            column=openpyxl_col_index + column_write_offset,
+        ).number_format = numbers.FORMAT_TEXT
+
+
+def _write_horizontally_merged_header(
+    start_row: int,
+    df: DataFrame,
+    column_write_offset: int,
+    field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
+    worksheet: Worksheet,
+) -> None:
+    """写入横向合并的表头"""
+    counter: dict[Label, int] = defaultdict(int)
+    for field_meta in field_meta_mapping.values():
+        if field_meta.parent_label is None:
+            raise RuntimeError('运行时 parent_label 不能为空')
+        counter[field_meta.parent_label] += 1
+
+    for openpyxl_col_index, column in enumerate(
+        df.columns[column_write_offset:],
+        start=column_write_offset + OPENPYXL_EXCEL_INDEX_START_AT,
+    ):
+        field_meta = field_meta_mapping[column]
+        if field_meta.parent_label is None:
+            raise RuntimeError('运行时 parent_label 不能为空')
+        if field_meta.label != field_meta.parent_label and field_meta.offset == 0:
+            # 如果 label 和 parent_label 不同，说明需要左右合并
+            # 首先设置值
+            cell = worksheet.cell(row=start_row, column=openpyxl_col_index + column_write_offset)
+            cell.value = field_meta.parent_label
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            # 然后合并单元格
+            worksheet.merge_cells(
+                start_row=start_row,
+                start_column=openpyxl_col_index + column_write_offset,
+                end_row=start_row,
+                end_column=openpyxl_col_index + column_write_offset + counter[field_meta.parent_label] - 1,
+            )
+
+
 def _write_merged_header(  # pragma: no mccabe
     df: DataFrame,
     field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
@@ -190,51 +252,9 @@ def _write_merged_header(  # pragma: no mccabe
     )
     # 第一遍遍历，找出纵向合并的单元格
     start_row = row_write_offset + OPENPYXL_EXCEL_INDEX_START_AT
-    for openpyxl_col_index, column in enumerate(
-        df.columns[column_write_offset:],
-        start=column_write_offset + OPENPYXL_EXCEL_INDEX_START_AT,
-    ):
-        field_meta = field_meta_mapping[column]
-        if field_meta.label == field_meta.parent_label:
-            # 如果 label 和 parent_label 相同，说明需要上下合并
-            worksheet.merge_cells(
-                start_row=start_row,
-                start_column=openpyxl_col_index + column_write_offset,
-                end_row=start_row + 1,  # +1 表示合并两行
-                end_column=openpyxl_col_index + column_write_offset,
-            )
-        worksheet.cell(
-            row=start_row,
-            column=openpyxl_col_index + column_write_offset,
-        ).number_format = numbers.FORMAT_TEXT
-
+    _write_vertically_merged_header(row_write_offset, df, column_write_offset, field_meta_mapping, worksheet)
     # 第二遍遍历，找出横向合并的单元格
-    counter: dict[Label, int] = defaultdict(int)
-    for field_meta in field_meta_mapping.values():
-        if field_meta.parent_label is None:
-            raise RuntimeError('运行时 parent_label 不能为空')
-        counter[field_meta.parent_label] += 1
-
-    for openpyxl_col_index, column in enumerate(
-        df.columns[column_write_offset:],
-        start=column_write_offset + OPENPYXL_EXCEL_INDEX_START_AT,
-    ):
-        field_meta = field_meta_mapping[column]
-        if field_meta.parent_label is None:
-            raise RuntimeError('运行时 parent_label 不能为空')
-        if field_meta.label != field_meta.parent_label and field_meta.offset == 0:
-            # 如果 label 和 parent_label 不同，说明需要左右合并
-            # 首先设置值
-            cell = worksheet.cell(row=start_row, column=openpyxl_col_index + column_write_offset)
-            cell.value = field_meta.parent_label
-            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            # 然后合并单元格
-            worksheet.merge_cells(
-                start_row=start_row,
-                start_column=openpyxl_col_index + column_write_offset,
-                end_row=start_row,
-                end_column=openpyxl_col_index + column_write_offset + counter[field_meta.parent_label] - 1,
-            )
+    _write_horizontally_merged_header(start_row, df, column_write_offset, field_meta_mapping, worksheet)
 
     if close_file:
         writer.close()

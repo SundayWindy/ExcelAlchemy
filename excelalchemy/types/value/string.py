@@ -101,26 +101,29 @@ class String(str, ABCValueType):
     # mccabe-complexity: 12
     @classmethod
     def __validate__(cls, value: str, field_meta: FieldMetaInfo) -> str:
-        try:
-            parsed = str(value)
-        except Exception as exc:
-            raise ValueError('无法识别的输入') from exc
-
+        parsed = str(value)
         errors: list[str] = []
 
         if field_meta.importer_max_length is not None:
             if len(parsed) > field_meta.importer_max_length:
                 errors.append(f'最长为{field_meta.importer_max_length}个字')
 
-        if field_meta.character_set is None:
-            raise ProgrammaticError('character_set 未设置')
-
-        for single_character in parsed:
-            if not any(_CHARACTER_SET_TO_VALIDATOR[cs](single_character) for cs in field_meta.character_set):
-                errors.append(f'仅允许输入{_format_character_set_names(field_meta.character_set)}')
-                break
+        errors.extend(cls.__check_character_set__(parsed, field_meta))
 
         if errors:
             raise ValueError(*errors)
         else:
             return parsed
+
+    @classmethod
+    def __check_character_set__(cls, value: str, field_meta: FieldMetaInfo) -> list[str]:
+        errors = []
+        if field_meta.character_set is None:
+            raise ProgrammaticError('character_set 未设置')
+
+        for single_character in value:
+            if not any(_CHARACTER_SET_TO_VALIDATOR[cs](single_character) for cs in field_meta.character_set):
+                errors.append(f'仅允许输入{_format_character_set_names(field_meta.character_set)}')
+                break
+
+        return errors

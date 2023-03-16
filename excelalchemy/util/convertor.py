@@ -5,7 +5,7 @@ from excelalchemy.const import FIELD_DATA_KEY
 from excelalchemy.types.identity import Key
 
 
-def import_data_converter(data: dict[str, Any]) -> dict[str, Any]:
+def import_data_converter(data: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
     # _to_snake_case
     result: dict[str, Any] = {}
     for k, v in data.items():
@@ -14,7 +14,7 @@ def import_data_converter(data: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def export_data_converter(data: dict[str, Any]) -> dict[str, Any]:
+def export_data_converter(data: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
     result: dict[str, Any] = {}
     for k, v in data.items():
         camel_key = _to_camel_case(k)

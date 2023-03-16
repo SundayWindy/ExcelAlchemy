@@ -37,7 +37,7 @@ def extract_pydantic_model(
     return list(_extract_pydantic_model(model))
 
 
-def instantiate_pydantic_model(
+def instantiate_pydantic_model(  # noqa: C901
     data: dict[Key, Any],
     model: type[ModelT],
 ) -> ModelT | list[ExcelCellError]:

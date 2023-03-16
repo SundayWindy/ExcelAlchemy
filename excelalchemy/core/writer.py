@@ -283,24 +283,12 @@ def _get_parsed_value(
     return str(cell_value)
 
 
-# pylint: disable=too-many-locals
-def _write_value_mark_error(  # pragma: no mccabe
-    df: DataFrame,
-    errors: dict[RowIndex, dict[ColumnIndex, list[ExcelCellError]]],
-    field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
-    file: BinaryIO,
-    sheet_name: str,
-    row_write_offset: int = 0,
-    column_write_offset: int = 0,
-    close_file: bool = True,
-    writer: ExcelWriter | None = None,
-    pands_data_start_index: int = 0,
-) -> BinaryIO:
-    """写入错误标记，并把对应位置标红"""
-
-    writer = writer or ExcelWriter(file, engine='openpyxl')
-    worksheet: Worksheet = writer.sheets[sheet_name]
-
+def _mark_error(
+    worksheet: Worksheet,
+    errors: dict[int, dict[int, list[Exception]]],
+    column_write_offset: int,
+    row_write_offset: int,
+):
     for row_index, cols in errors.items():
         for col_index, exceptions in cols.items():
             if not exceptions:
@@ -318,6 +306,15 @@ def _write_value_mark_error(  # pragma: no mccabe
             )
             cell.alignment = Alignment(wrap_text=True)
 
+
+def _write_value(
+    df: DataFrame,
+    worksheet: Worksheet,
+    field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
+    pands_data_start_index: int,
+    column_write_offset: int,
+    row_write_offset: int,
+) -> None:
     col_width_mapping: dict[ColumnIndex, float] = defaultdict(float)
     for row_index_ in range(pands_data_start_index, df.shape[0]):  # iterate over rows
         for column_index_ in range(df.shape[1]):  # iterate over columns
@@ -343,6 +340,41 @@ def _write_value_mark_error(  # pragma: no mccabe
         worksheet.column_dimensions[get_column_letter(openpyxl_col_index)].width = round(
             (width + 4) * CHARACTER_WIDTH, 2
         )
+
+
+# pylint: disable=too-many-locals
+def _write_value_mark_error(  # pragma: no mccabe
+    df: DataFrame,
+    errors: dict[RowIndex, dict[ColumnIndex, list[ExcelCellError]]],
+    field_meta_mapping: dict[UniqueLabel, FieldMetaInfo],
+    file: BinaryIO,
+    sheet_name: str,
+    row_write_offset: int = 0,
+    column_write_offset: int = 0,
+    close_file: bool = True,
+    writer: ExcelWriter | None = None,
+    pands_data_start_index: int = 0,
+) -> BinaryIO:
+    """写入错误标记，并把对应位置标红"""
+
+    writer = writer or ExcelWriter(file, engine='openpyxl')
+    worksheet: Worksheet = writer.sheets[sheet_name]
+
+    _mark_error(
+        worksheet=worksheet,
+        errors=errors,
+        column_write_offset=column_write_offset,
+        row_write_offset=row_write_offset,
+    )
+
+    _write_value(
+        df=df,
+        worksheet=worksheet,
+        field_meta_mapping=field_meta_mapping,
+        pands_data_start_index=pands_data_start_index,
+        row_write_offset=row_write_offset,
+        column_write_offset=column_write_offset,
+    )
 
     if close_file:
         writer.close()

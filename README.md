@@ -6,13 +6,6 @@ ExcelAlchemy 是一个用于从 Minio 下载 Excel 文件，解析用户输入�
 
 ## 安装
 
-在使用该库前，请先安装以下依赖：
-
-- Python 3.6+
-- Pydantic
-- openpyxl
-- minio
-
 使用 pip 安装：
 
 ```

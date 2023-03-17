@@ -34,8 +34,6 @@ class ImportMode(str, Enum):
 
 @dataclass
 class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModelT]):
-    import_mode: ImportMode = field(default=ImportMode.CREATE)
-
     create_importer_model: Type[ImporterCreateModelT] | None = field(default=None)
     update_importer_model: Type[ImporterUpdateModelT] | None = field(default=None)
 
@@ -47,6 +45,8 @@ class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModel
     context: ContextT | None = field(default=None)
     is_data_exist: Callable[[dict[str, Any], ContextT | None], Awaitable[bool]] | None = field(default=None)
     exec_formatter: Callable[[Exception], str] = field(default=str)
+
+    import_mode: ImportMode = field(default=ImportMode.CREATE)
 
     minio: Minio = field(default=None)
     bucket_name: str = field(default='excel')

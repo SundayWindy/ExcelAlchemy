@@ -310,7 +310,7 @@ class FieldMetaInfo(FieldInfo):
 
     @property
     def comment_max_length(self) -> str:
-        return f'最大长度：{self.max_length}' or '无限制'
+        return f'最大长度：{self.max_length or "无限制"}'
 
     @property
     def must_date_format(self) -> DateFormat:

@@ -130,10 +130,3 @@ asyncio.run(main())
 ## 许可证
 
 ExcelAlchemy 使用 MIT 许可证。详细信息请参阅 [LICENSE](https://github.com/username/repo/blob/main/LICENSE)。
-## 贡献
-
-如果你在使用 ExcelAlchemy 过程中遇到了问题或者有任何建议，欢迎在 [GitHub Issues](https://github.com/SundayWindy/ExcelAlchemy/issues) 中提出。我们也非常欢迎你提交 Pull Request，贡献你的代码。
-
-## 许可证
-
-ExcelAlchemy 使用 MIT 许可证。详细信息请参阅 [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/master/LICENSE)。

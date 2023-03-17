@@ -157,13 +157,19 @@ class TestExcelAlchemy(IsolatedAsyncioTestCase):
     async def test_create_import_with_error(self):
         alchemy = ExcelAlchemy[
             dict[Key, Any],
-            ImporterConfig[dict[Key, Any], ThingCreateFailedImporter, ThingUpdaterSuccessImporter],
+            ThingCreateFailedImporter,
+            ThingUpdaterSuccessImporter,
+            ThingCreateFailedImporter,
+            ThingUpdaterSuccessImporter,
+            Any,
         ](
-            import_mode=ImportMode.CREATE,
-            minio=self.instance,
-            bucket_name='api',
-            create_importer_model=ThingCreateFailedImporter,
-            creator=create_thing_failed,
+            ImporterConfig(
+                import_mode=ImportMode.CREATE,
+                minio=self.instance,
+                bucket_name='api',
+                create_importer_model=ThingCreateFailedImporter,
+                creator=create_thing_failed,
+            )
         )
 
         template = alchemy.download_template()

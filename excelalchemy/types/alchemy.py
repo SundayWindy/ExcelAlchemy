@@ -120,5 +120,3 @@ class ExporterConfig(Generic[ExporterModelT]):
 
     def __post_init__(self):
         self.validate_model()
-
-

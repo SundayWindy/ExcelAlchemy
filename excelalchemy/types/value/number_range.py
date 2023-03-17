@@ -47,7 +47,7 @@ class NumberRange(ComplexABCValueType):
         # Attempt to create a new NumberRange object from a dictionary
         try:
             # pyright: reportGeneralTypeIssues=false
-            start, end = Decimal(value['start']), Decimal(value['end'])
+            start, end = Decimal(value['start']), Decimal(value['end'])  # type: ignore[index]
             return NumberRange(start, end)
         except (KeyError, TypeError, ValueError) as exc:
             logging.warning('%s 类型无法解析 Excel 输入，返回原值 %s。原因：%s', cls.__name__, value, exc)
@@ -83,9 +83,7 @@ class NumberRange(ComplexABCValueType):
             return parsed
 
     @staticmethod
-    def __maybe_number_range__(
-        value: 'NumberRange' | dict[str, Decimal] | Any, field_meta: FieldMetaInfo
-    ) -> 'NumberRange':
+    def __maybe_number_range__(value: dict[str, Decimal] | Any, field_meta: FieldMetaInfo) -> 'NumberRange':
         if isinstance(value, NumberRange):
             return value
 

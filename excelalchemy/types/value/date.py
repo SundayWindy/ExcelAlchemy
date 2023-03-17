@@ -7,7 +7,6 @@ import pendulum
 from pendulum import DateTime
 
 from excelalchemy.const import DATE_FORMAT_TO_HINT_MAPPING
-from excelalchemy.const import DATE_FORMAT_TO_PYTHON_MAPPING
 from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.const import DataRangeOption
 from excelalchemy.types.abstract import ABCValueType
@@ -57,11 +56,11 @@ class Date(ABCValueType, datetime):
             case None | '':
                 return ''
             case datetime():
-                python_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[field_meta.date_format]
-                return value.strftime(python_date_format)
+                return value.strftime(field_meta.python_date_format)
             case int() | float():
-                python_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[field_meta.date_format]
-                return datetime.fromtimestamp(int(value) / MILLISECOND_TO_SECOND).strftime(python_date_format)
+                return datetime.fromtimestamp(int(value) / MILLISECOND_TO_SECOND).strftime(
+                    field_meta.python_date_format
+                )
             case _:
                 return str(value) if value is not None else ''
 
@@ -87,9 +86,9 @@ class Date(ABCValueType, datetime):
         return parsed
 
     @staticmethod
-    def _validate_date_range(parsed: datetime, field_meta: FieldMetaInfo) -> tuple[str]:
+    def _validate_date_range(parsed: datetime, field_meta: FieldMetaInfo) -> list[str]:
         now = datetime.now(tz=field_meta.timezone)
-        errors = []
+        errors: list[str] = []
 
         match field_meta.date_range_option:
             case DataRangeOption.PRE:
@@ -101,4 +100,4 @@ class Date(ABCValueType, datetime):
             case DataRangeOption.NONE | None:
                 ...
 
-        return tuple(errors)
+        return errors

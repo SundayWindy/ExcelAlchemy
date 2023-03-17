@@ -3,6 +3,7 @@ import base64
 from collections import defaultdict
 from math import ceil
 from tempfile import NamedTemporaryFile
+from typing import Any
 from typing import BinaryIO
 from typing import cast
 
@@ -270,9 +271,9 @@ def _get_parsed_value(
 ) -> str:
     """用于把 pandas 读取的 Excel 之后的数据，转回用户可识别的数据"""
 
-    cell_value: str | None = df.iloc[row_index, col_index]
+    cell_value: str | Any | None = df.iloc[row_index, col_index]
 
-    if cell_value is None or value_is_nan(cell_value):
+    if value_is_nan(cell_value):
         return ''  # parse None for end-user
     col_label = cast(UniqueLabel, df.columns[col_index])
     if col_label not in field_meta_mapping:
@@ -285,7 +286,7 @@ def _get_parsed_value(
 
 def _mark_error(
     worksheet: Worksheet,
-    errors: dict[int, dict[int, list[Exception]]],
+    errors: dict[RowIndex, dict[ColumnIndex, list[ExcelCellError]]],
     column_write_offset: int,
     row_write_offset: int,
 ):

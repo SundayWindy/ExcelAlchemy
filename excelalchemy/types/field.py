@@ -14,6 +14,7 @@ from pydantic.typing import NoArgAnyCallable
 
 from excelalchemy.const import DATA_RANGE_OPTION_TO_CHINESE
 from excelalchemy.const import DATE_FORMAT_TO_HINT_MAPPING
+from excelalchemy.const import DATE_FORMAT_TO_PYTHON_MAPPING
 from excelalchemy.const import DEFAULT_FIELD_META_ORDER
 from excelalchemy.const import MAX_OPTIONS_COUNT
 from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
@@ -312,10 +313,14 @@ class FieldMetaInfo(FieldInfo):
         return f'最大长度：{self.max_length}' or '无限制'
 
     @property
-    def must_date_format(self) -> str:
+    def must_date_format(self) -> DateFormat:
         if self.date_format is None:
             raise RuntimeError('运行时 date_format 不能为空')
         return self.date_format
+
+    @property
+    def python_date_format(self) -> str:
+        return DATE_FORMAT_TO_PYTHON_MAPPING[self.must_date_format]
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.label})'

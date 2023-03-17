@@ -12,7 +12,7 @@ from excelalchemy.types.field import FieldMetaInfo
 def canonicalize_decimal(value: Decimal, digits_limit: int | None) -> Decimal:
     """将 Decimal 转换为指定精度的 Decimal"""
     # pyright: reportGeneralTypeIssues=false
-    if digits_limit is not None and abs(value.as_tuple().exponent) != digits_limit:
+    if digits_limit is not None and abs(value.as_tuple().exponent) != digits_limit:  # type: ignore[arg-type]
         try:
             value = Decimal(value).quantize(
                 Decimal(f'0.{"0" * digits_limit}'),
@@ -60,7 +60,7 @@ class Number(Decimal, ABCValueType):
         if isinstance(value, str):
             value = value.strip()
         try:
-            return transform_decimal(Decimal(value))
+            return transform_decimal(Decimal(value))  # type: ignore[arg-type]
         except Exception as exc:
             logging.warning('ValueType 类型 <%s> 无法解析 Excel 输入, 返回原值:%s, 原因: %s', cls.__name__, value, exc)
             return str(value) if value is not None else ''
@@ -69,6 +69,7 @@ class Number(Decimal, ABCValueType):
     def deserialize(cls, value: str | None | Any, field_meta: FieldMetaInfo) -> str:
         if value is None or value == '':
             return ''
+
         try:
             return str(transform_decimal(Decimal(value)))
         except Exception as exc:
@@ -76,7 +77,7 @@ class Number(Decimal, ABCValueType):
             return str(value)
 
     @classmethod
-    def __get_range_description__(cls, field_meta: FieldMetaInfo) -> str:
+    def __get_range_description__(cls, field_meta: FieldMetaInfo) -> str:  # type: ignore[return]
         match (field_meta.importer_le, field_meta.importer_ge):
             case (None, None):
                 return '无限制'
@@ -125,6 +126,8 @@ class Number(Decimal, ABCValueType):
     def __validate__(cls, value: Decimal | Any, field_meta: FieldMetaInfo) -> float | int:
         # 如果输入不是 Decimal 类型，尝试转换。
         parsed = cls.__maybe_decimal__(value)
+        if parsed is None:
+            raise ValueError('无效输入，请输入数字。')
         # 初始化一个错误信息列表。
         errors: list[str] = cls.__check_range__(value, field_meta)
         if errors:

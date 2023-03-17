@@ -27,7 +27,7 @@ ModelT = TypeVar('ModelT', bound=BaseModel)
 
 
 def extract_pydantic_model(
-    model: type[ImporterCreateModelT] | type[ImporterUpdateModelT] | None,
+    model: type[ImporterCreateModelT] | type[ImporterUpdateModelT] | type[BaseModel] | None,
 ) -> list[FieldMetaInfo]:
     """根据 Pydantic 模型提取 Excel 表头信息
     包含是否必填、值类型、注释等信息

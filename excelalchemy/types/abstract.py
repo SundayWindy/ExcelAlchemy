@@ -40,7 +40,8 @@ class ABCValueType(ABC):
 
     @classmethod
     def __wrapped_validate__(cls, value: Any, field: ModelField) -> Any:
-        return cls.__validate__(value, field.field_info)  # pyright: reportGeneralTypeIssues=false
+        # pyright: reportGeneralTypeIssues=false
+        return cls.__validate__(value, field.field_info)  # type: ignore[arg-type]
 
     @classmethod
     @abstractmethod

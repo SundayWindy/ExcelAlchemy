@@ -23,7 +23,11 @@ from excelalchemy.const import REASON_COLUMN_LABEL
 from excelalchemy.const import RESULT_COLUMN_KEY
 from excelalchemy.const import RESULT_COLUMN_LABEL
 from excelalchemy.const import ContextT
-from excelalchemy.const import ExcelConfigT
+from excelalchemy.const import CreateModelT
+from excelalchemy.const import ExporterModelT
+from excelalchemy.const import ImporterCreateModelT
+from excelalchemy.const import ImporterUpdateModelT
+from excelalchemy.const import UpdateModelT
 from excelalchemy.core.abstract import ABCExcelAlchemy
 from excelalchemy.core.writer import render_data_excel
 from excelalchemy.core.writer import render_merged_header_excel
@@ -72,11 +76,32 @@ REASON_COLUMN.key = REASON_COLUMN.parent_key = REASON_COLUMN_KEY
 REASON_COLUMN.value_type = SystemReserved
 
 
-class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
-    def __init__(self, config: ExcelConfigT):
+class ExcelAlchemy(
+    ABCExcelAlchemy[
+        ContextT,
+        ImporterCreateModelT,
+        ImporterUpdateModelT,
+        CreateModelT,
+        UpdateModelT,
+        ExporterModelT,
+    ],
+):
+    def __init__(
+        self,
+        config: ImporterConfig[
+            ContextT,
+            ImporterCreateModelT,
+            ImporterUpdateModelT,
+        ]
+        | ExporterConfig[ExporterModelT],
+    ) -> None:
         self.df = DataFrame()  # 初始化一个空的DataFrame
         self.header_df = DataFrame()  # 初始化一个空的DataFrame
-        self.config: ExcelConfigT = config
+        self.config: ImporterConfig[
+            ContextT,
+            ImporterCreateModelT,
+            ImporterUpdateModelT,
+        ] | ExporterConfig[ExporterModelT] = config
         # 每个单元格的错误, 用于标红单元格, 索引与 df 位置对应
         self.cell_errors: dict[RowIndex, dict[ColumnIndex, list[ExcelCellError]]] = {}
         # 行错误, 用于标记错误信息，单元格错误会在行错误中显示，行标索引与 df 位置对应
@@ -105,8 +130,9 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
     def __init_from_config__(self) -> None:
         """从配置类初始化"""
-
-        self.context = self.config.context
+        if self.config is None:  # pyright: reportUnnecessaryComparison=false
+            raise RuntimeError('配置类不能为空')
+        self.context = getattr(self.config, 'context', None)
         importer_model = self.__get_importer_model__()
         self.__init_field_meta__(importer_model)
 
@@ -129,24 +155,26 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             self.unique_key_to_field_meta[field_meta.unique_key] = field_meta
             self.unique_label_to_field_meta[field_meta.unique_label] = field_meta
 
-    def __get_importer_model__(self) -> type[BaseModel]:
+    def __get_importer_model__(self) -> type[ImporterCreateModelT] | type[ImporterUpdateModelT] | type[ExporterModelT]:
         if self.excel_mode == ExcelMode.IMPORT:
             if not isinstance(self.config, ImporterConfig):
                 raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
             if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
-                importer_model = self.config.create_importer_model
+                importer_model = self.config.create_importer_model  # type: ignore[assignment]
             elif self.config.import_mode == ImportMode.UPDATE:
-                importer_model = self.config.update_importer_model
+                importer_model = self.config.update_importer_model  # type: ignore[assignment]
             else:
                 raise RuntimeError('不支持的导入模式')
+
         elif self.excel_mode == ExcelMode.EXPORT:
             if not isinstance(self.config, ExporterConfig):
                 raise TypeError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
-            importer_model = self.config.exporter_model
+            importer_model = self.config.exporter_model  # type: ignore[assignment]
+
         else:
             raise RuntimeError('不支持的模式')
 
-        return importer_model
+        return importer_model  # type: ignore
 
     @staticmethod
     def _check_field_meta_order(field_metas: list[FieldMetaInfo]) -> None:
@@ -262,11 +290,11 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
     def excel_mode(self) -> ExcelMode:
         if self.config is None:
             raise RuntimeError('请先设置转换模型配置')
+
         if isinstance(self.config, ImporterConfig):
             return ExcelMode.IMPORT
-        if isinstance(self.config, ExporterConfig):
-            return ExcelMode.EXPORT
-        raise RuntimeError('未知的转换模型配置')
+
+        return ExcelMode.EXPORT
 
     @property
     def extra_header_count_on_import(self) -> int:
@@ -627,7 +655,6 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
         2、将 Label 转换为 Key
 
         """
-        assert isinstance(self.config, ImporterConfig)
         agg_data: dict[Key, Any] = self.__agg_data__(row_data)
         serialized_agg_data: dict[Key, Any] = self.__serialize_agg_data__(agg_data)
 
@@ -642,7 +669,10 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
                 raise RuntimeError(f' {type(field_meta).__name__} 未配置 key/parent_key')
 
             if pandas.isna(value):
-                if self.config.import_mode in {ImportMode.UPDATE, ImportMode.CREATE_OR_UPDATE}:
+                if self.config.import_mode in {  # type: ignore[union-attr]
+                    ImportMode.UPDATE,
+                    ImportMode.CREATE_OR_UPDATE,
+                }:
                     value = None  # 如果是更新模式，且值为 NaN，表示将该值设置为 None
                 else:
                     continue

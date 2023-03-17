@@ -98,6 +98,7 @@ ignore-paths = [
 extension-pkg-whitelist = [
     "pydantic",
     "pandas",
+    "pendulum",
 
 ]
 

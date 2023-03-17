@@ -4,14 +4,28 @@ from typing import Any
 from typing import Generic
 
 from excelalchemy.const import ContextT
-from excelalchemy.const import ExcelConfigT
+from excelalchemy.const import CreateModelT
+from excelalchemy.const import ExporterModelT
+from excelalchemy.const import ImporterCreateModelT
+from excelalchemy.const import ImporterUpdateModelT
+from excelalchemy.const import UpdateModelT
 from excelalchemy.types.identity import Base64Str
 from excelalchemy.types.identity import Key
 from excelalchemy.types.identity import UrlStr
 from excelalchemy.types.result import ImportResult
 
 
-class ABCExcelAlchemy(ABC, Generic[ContextT, ExcelConfigT]):
+class ABCExcelAlchemy(
+    ABC,
+    Generic[
+        ContextT,
+        ImporterCreateModelT,
+        ImporterUpdateModelT,
+        CreateModelT,
+        UpdateModelT,
+        ExporterModelT,
+    ],
+):
     @abstractmethod
     def download_template(self, sample_data: list[dict[str, Any]] | None = None) -> str:
         """下载导入模版, Excel 字段顺序与定义的导出模型一致"""

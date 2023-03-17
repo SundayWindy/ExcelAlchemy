@@ -67,13 +67,23 @@ class DateRange(ComplexABCValueType):
         match value:
             case dict():
                 try:
-                    start_str = value.get('start')
-                    end_str = value.get('end')
-
+                    start_str, end_str = value.get('start'), value.get('end')
                     # pyright: reportGeneralTypeIssues=false
                     # pyright: reportUnknownArgumentType=false
-                    start_time = pendulum.parse(start_str).replace(tzinfo=field_meta.timezone) if start_str else None
-                    end_time = pendulum.parse(end_str).replace(tzinfo=field_meta.timezone) if end_str else None
+                    start_time = (
+                        pendulum.parse(start_str).replace(  # type: ignore
+                            tzinfo=field_meta.timezone,
+                        )
+                        if start_str
+                        else None
+                    )
+                    end_time = (
+                        pendulum.parse(end_str).replace(  # type: ignore
+                            tzinfo=field_meta.timezone,
+                        )
+                        if end_str
+                        else None
+                    )
 
                     return {'start': start_time, 'end': end_time}
                 except Exception as e:
@@ -82,7 +92,7 @@ class DateRange(ComplexABCValueType):
             case datetime():
                 return value
             case str():
-                datetime_value = pendulum.parse(value).replace(tzinfo=field_meta.timezone)
+                datetime_value = pendulum.parse(value).replace(tzinfo=field_meta.timezone)  # type: ignore
                 return datetime_value
             case _:
                 return value

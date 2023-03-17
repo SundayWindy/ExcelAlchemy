@@ -70,6 +70,8 @@ class DateRange(ComplexABCValueType):
                     start_str = value.get('start')
                     end_str = value.get('end')
 
+                    # pyright: reportGeneralTypeIssues=false
+                    # pyright: reportUnknownArgumentType=false
                     start_time = pendulum.parse(start_str).replace(tzinfo=field_meta.timezone) if start_str else None
                     end_time = pendulum.parse(end_str).replace(tzinfo=field_meta.timezone) if end_str else None
 
@@ -121,25 +123,24 @@ class DateRange(ComplexABCValueType):
 
     @classmethod
     def deserialize(cls, value: dict[str, str] | str | Any | None, field_meta: FieldMetaInfo) -> str:
-        match value:
-            case None | '':
-                return ''
-            case str():
-                return value
-            case datetime():
-                date_format = field_meta.date_format
-                if not date_format:
-                    raise RuntimeError('日期格式未定义')
-                py_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[date_format]
-                return value.strftime(py_date_format)
-            case dict():
-                start = value['start']
-                end = value['end']
-                if isinstance(start, (int, float)):
-                    start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
-                if isinstance(end, (int, float)):
-                    end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
-                return start + ' - ' + end
-            case _:
-                logging.warning('%s 反序列化失败，返回原值', cls.__name__)
-                return value if value is not None else ''
+        if value is None or value == '':
+            return ''
+        date_format = field_meta.must_date_format
+        py_date_format = DATE_FORMAT_TO_PYTHON_MAPPING[date_format]
+
+        if isinstance(value, str):
+            return value
+
+        if isinstance(value, datetime):
+            return value.strftime(py_date_format)
+
+        if isinstance(value, dict):
+            start, end = value['start'], value['end']
+            if isinstance(start, (int, float)):
+                start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
+            if isinstance(end, (int, float)):
+                end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
+            return start + ' - ' + end
+
+        logging.warning('%s 反序列化失败，返回原值', cls.__name__)
+        return value if value is not None else ''

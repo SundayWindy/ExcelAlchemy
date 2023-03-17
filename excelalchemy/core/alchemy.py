@@ -46,6 +46,7 @@ from excelalchemy.types.identity import Label
 from excelalchemy.types.identity import RowIndex
 from excelalchemy.types.identity import UniqueKey
 from excelalchemy.types.identity import UniqueLabel
+from excelalchemy.types.identity import UrlStr
 from excelalchemy.types.result import ImportResult
 from excelalchemy.types.result import ValidateHeaderResult
 from excelalchemy.types.result import ValidateResult
@@ -230,12 +231,11 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             has_merged_header=has_merged_header,
         )
 
-    def export_upload(self, output_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> bool:
+    def export_upload(self, output_name: str, data: list[dict[str, Any]], keys: list[Key] | None = None) -> UrlStr:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
 
         content_with_prefix = self.export(data, keys)
-        url = self._upload_file(output_name, content_with_prefix)
-        return True
+        return self._upload_file(output_name, content_with_prefix)
 
     def add_context(self, context: ContextT) -> None:
         """添加转换模型上下文"""
@@ -339,7 +339,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
 
         return content_with_prefix
 
-    def _upload_file(self, output_name: str, content_with_prefix: str) -> str:
+    def _upload_file(self, output_name: str, content_with_prefix: str) -> UrlStr:
         """上传文件"""
         assert isinstance(self.config, (ExporterConfig, ImporterConfig))  # only for type check
         url = upload_file_from_minio_object(
@@ -349,7 +349,7 @@ class ExcelAlchemy(ABCExcelAlchemy[ContextT, ExcelConfigT]):
             remove_excel_prefix(content_with_prefix),
             self.config.url_expires,
         )
-        return url
+        return UrlStr(url)
 
     def _order_errors(self, errors: list[ExcelRowError | ExcelCellError]) -> Iterable[ExcelCellError | ExcelRowError]:
         """对错误进行排序,依据 ordered_field_meta 的 unique_label 索引排序，ExcelRowError 错误在最后"""

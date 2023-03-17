@@ -270,7 +270,7 @@ def _get_parsed_value(
 ) -> str:
     """用于把 pandas 读取的 Excel 之后的数据，转回用户可识别的数据"""
 
-    cell_value = df.iloc[row_index, col_index]
+    cell_value: str | None = df.iloc[row_index, col_index]
 
     if cell_value is None or value_is_nan(cell_value):
         return ''  # parse None for end-user

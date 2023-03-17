@@ -1,5 +1,6 @@
 import logging
 from typing import Any
+from typing import cast
 
 from excelalchemy.const import MULTI_CHECKBOX_SEPARATOR
 from excelalchemy.exc import ProgrammaticError
@@ -26,7 +27,7 @@ class MultiCheckbox(ABCValueType, list[str]):
     def serialize(cls, value: str | Any, field_meta: FieldMetaInfo) -> list[str] | str:
         # If the value is a list, convert all items to strings and strip whitespace
         if isinstance(value, list):
-            return [str(item).strip() for item in value]
+            return [str(item).strip() for item in cast(list[Any], value)]
 
         # If the value is a string, split it into a list using MULTI_CHECKBOX_SEPARATOR and strip whitespace
         if isinstance(value, str):
@@ -59,7 +60,7 @@ class MultiCheckbox(ABCValueType, list[str]):
             return result
 
     @classmethod
-    def deserialize(cls, value: str | list[OptionId] | None | Any, field_meta: FieldMetaInfo) -> Any:
+    def deserialize(cls, value: str | list[OptionId] | None, field_meta: FieldMetaInfo) -> str:
         match value:
             case None | '':
                 return ''
@@ -68,6 +69,3 @@ class MultiCheckbox(ABCValueType, list[str]):
             case list():
                 option_names = field_meta.exchange_option_ids_to_names(value)
                 return f'{MULTI_CHECKBOX_SEPARATOR}'.join(option_names)
-
-        logging.warning('%s 反序列化失败', cls.__name__)
-        return value if value is not None else ''

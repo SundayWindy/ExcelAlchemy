@@ -46,8 +46,8 @@ class NumberRange(ComplexABCValueType):
 
         # Attempt to create a new NumberRange object from a dictionary
         try:
-            start = Decimal(value['start'])
-            end = Decimal(value['end'])
+            # pyright: reportGeneralTypeIssues=false
+            start, end = Decimal(value['start']), Decimal(value['end'])
             return NumberRange(start, end)
         except (KeyError, TypeError, ValueError) as exc:
             logging.warning('%s 类型无法解析 Excel 输入，返回原值 %s。原因：%s', cls.__name__, value, exc)
@@ -83,9 +83,12 @@ class NumberRange(ComplexABCValueType):
             return parsed
 
     @staticmethod
-    def __maybe_number_range__(value: Any, field_meta: FieldMetaInfo) -> 'NumberRange':
+    def __maybe_number_range__(
+        value: 'NumberRange' | dict[str, Decimal] | Any, field_meta: FieldMetaInfo
+    ) -> 'NumberRange':
         if isinstance(value, NumberRange):
             return value
+
         if isinstance(value, dict):
             try:
                 value['start'] = canonicalize_decimal(Decimal(value['start']), field_meta.fraction_digits)
@@ -93,4 +96,5 @@ class NumberRange(ComplexABCValueType):
                 return NumberRange(value['start'], value['end'])
             except Exception as exc:
                 raise ValueError('请输入数字') from exc
+
         raise ValueError('请输入数字')

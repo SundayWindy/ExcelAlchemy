@@ -9,6 +9,7 @@ from pydantic.fields import ModelField
 from excelalchemy.types.identity import Key
 
 if TYPE_CHECKING:
+    # pyright: reportImportCycles=false
     from excelalchemy.types.field import FieldMetaInfo
 else:
     FieldMetaInfo = Any
@@ -39,7 +40,7 @@ class ABCValueType(ABC):
 
     @classmethod
     def __wrapped_validate__(cls, value: Any, field: ModelField) -> Any:
-        return cls.__validate__(value, field.field_info)
+        return cls.__validate__(value, field.field_info)  # pyright: reportGeneralTypeIssues=false
 
     @classmethod
     @abstractmethod

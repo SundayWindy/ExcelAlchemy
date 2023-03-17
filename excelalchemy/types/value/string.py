@@ -117,7 +117,7 @@ class String(str, ABCValueType):
 
     @classmethod
     def __check_character_set__(cls, value: str, field_meta: FieldMetaInfo) -> list[str]:
-        errors = []
+        errors: list[str] = []
         if field_meta.character_set is None:
             raise ProgrammaticError('character_set 未设置')
 

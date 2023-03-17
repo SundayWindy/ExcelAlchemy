@@ -74,8 +74,8 @@ repos:
 
   - repo: local
     hooks:
-      - id: mypy-excelalchemy
-        name: mypy-excelalchemy
+      - id: mypy
+        name: mypy
         entry: mypy
         args:
           - excelalchemy

@@ -11,6 +11,7 @@ from excelalchemy.types.field import FieldMetaInfo
 
 def canonicalize_decimal(value: Decimal, digits_limit: int | None) -> Decimal:
     """将 Decimal 转换为指定精度的 Decimal"""
+    # pyright: reportGeneralTypeIssues=false
     if digits_limit is not None and abs(value.as_tuple().exponent) != digits_limit:
         try:
             value = Decimal(value).quantize(
@@ -30,7 +31,7 @@ def transform_decimal(value: Decimal | int | float | None) -> float | int | None
     if isinstance(value, (int, float)):
         return value
 
-    if not isinstance(value, Decimal):
+    if not isinstance(value, Decimal):  # pyright: reportUnnecessaryIsInstance=false
         raise TypeError(f'Expected Decimal, got {type(value)}')
 
     if value.as_tuple().exponent == 0:
@@ -55,7 +56,7 @@ class Number(Decimal, ABCValueType):
         )
 
     @classmethod
-    def serialize(cls, value: str | int | float, field_meta: FieldMetaInfo) -> Decimal | Any:
+    def serialize(cls, value: str | int | float | None, field_meta: FieldMetaInfo) -> Decimal | Any:
         if isinstance(value, str):
             value = value.strip()
         try:
@@ -85,8 +86,6 @@ class Number(Decimal, ABCValueType):
                 return f'≥ {field_meta.importer_ge}'
             case (le, ge):
                 return f'{ge}～{le}'
-            case _:
-                return '无限制'
 
     @staticmethod
     def __maybe_decimal__(value: Any) -> Decimal | None:

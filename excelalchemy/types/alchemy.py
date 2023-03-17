@@ -65,8 +65,6 @@ class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModel
                 self._validate_update()
             case ImportMode.CREATE_OR_UPDATE:
                 self._validate_create_or_update()
-            case _:
-                raise ValueError(f'导入模式 {self.import_mode} 不合法')
 
         return self
 

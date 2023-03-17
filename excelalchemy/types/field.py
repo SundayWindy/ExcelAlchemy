@@ -201,8 +201,8 @@ class FieldMetaInfo(FieldInfo):
         if (self.is_primary_key or self.unique) and self.required is False:
             raise ValueError('主键或唯一字段必须必填')
 
-    def exchange_option_ids_to_names(self, option_ids: list[str]) -> list[str]:
-        option_names = []
+    def exchange_option_ids_to_names(self, option_ids: list[str] | list[OptionId]) -> list[str]:
+        option_names: list[str] = []
 
         for option_id in option_ids:
             option_id = OptionId(option_id)
@@ -215,7 +215,8 @@ class FieldMetaInfo(FieldInfo):
         return option_names
 
     def exchange_names_to_option_ids_with_errors(self, names: list[str]) -> tuple[list[str], list[str]]:
-        errors, result = [], []
+        errors: list[str] = []
+        result: list[str] = []
         for name in names:
             option = self.options_name_map.get(name)
             if option is None:
@@ -309,6 +310,12 @@ class FieldMetaInfo(FieldInfo):
     @property
     def comment_max_length(self) -> str:
         return f'最大长度：{self.max_length}' or '无限制'
+
+    @property
+    def must_date_format(self) -> str:
+        if self.date_format is None:
+            raise RuntimeError('运行时 date_format 不能为空')
+        return self.date_format
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.label})'

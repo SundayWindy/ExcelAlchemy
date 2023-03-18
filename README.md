@@ -1,68 +1,66 @@
-# ExcelAlchemy 使用指南
+> [中文](README_cn.md) | English
+> 
 
+# ExcelAlchemy User Guide
 # 📊 ExcelAlchemy
 
-ExcelAlchemy 是一个用于从 Minio 下载 Excel 文件，解析用户输入并生成对应 Pydantic 类的 Python 库，同时也可以将 Pydantic 数据生成对应的 Excel，便于用户下载。
+ExcelAlchemy is a Python library that allows you to download Excel files from Minio, parse user inputs, and generate corresponding Pydantic classes. It also allows you to generate Excel files based on Pydantic classes for easy user downloads.
 
-## 安装
+## Installation
 
-使用 pip 安装：
+Use pip to install:
 
 ```
 pip install ExcelAlchemy
 ```
 
-## 使用方法
+## Usage
 
-### 从 Pydantic 类生成 Excel 模板
+### Generate Excel template from Pydantic class
 
 ```python
 from excelalchemy import ExcelAlchemy, FieldMeta, ImporterConfig, Number, String
 from pydantic import BaseModel
 
-
 class Importer(BaseModel):
-    age: Number = FieldMeta(label='年龄', order=1)
-    name: String = FieldMeta(label='名称', order=2)
-    phone: String | None = FieldMeta(label='电话', order=3)
-    address: String | None = FieldMeta(label='地址', order=4)
+    age: Number = FieldMeta(label='Age', order=1)
+    name: String = FieldMeta(label='Name', order=2)
+    phone: String | None = FieldMeta(label='Phone', order=3)
+    address: String | None = FieldMeta(label='Address', order=4)
 
 alchemy = ExcelAlchemy(ImporterConfig(Importer))
 base64content = alchemy.download_template()
 print(base64content)
 
 ```
-* 上面是一个简单的例子，从 Pydantic 类生成 Excel 模板，Excel 模版中将会有一个 Sheet，Sheet 名称为 `Sheet1`，并且会有四列，分别为 `年龄`、`名称`、`电话`、`地址`，其中 `年龄`、`名称` 为必填项，`电话`、`地址` 为可选项。
-* 返回一个 base64 编码的 Excel 字符串，可以直接在前端页面中使用 `window.open` 方法打开 Excel 文件，或者在浏览器地址栏中输入 base64content，即可下载 Excel 文件。
-* 在下载模版时，您也可以指定一些默认值，例如：
-
+* The above is a simple example of generating an Excel template from a Pydantic class. The Excel template will have a sheet named "Sheet1" with four columns: "Age", "Name", "Phone", and "Address". "Age" and "Name" are required fields, while "Phone" and "Address" are optional.
+* The method returns a base64-encoded string that represents the Excel file. You can directly use the window.open method to open the Excel file in the front-end, or download it by typing the base64 content in the browser's address bar.
+* When downloading a template, you can also specify some default values, for example:
+    
 ```python
 from excelalchemy import ExcelAlchemy, FieldMeta, ImporterConfig, Number, String
 from pydantic import BaseModel
 
-
 class Importer(BaseModel):
-    age: Number = FieldMeta(label='年龄', order=1)
-    name: String = FieldMeta(label='名称', order=2)
-    phone: String | None = FieldMeta(label='电话', order=3)
-    address: String | None = FieldMeta(label='地址', order=4)
-
+    age: Number = FieldMeta(label='Age', order=1)
+    name: String = FieldMeta(label='Name', order=2)
+    phone: String | None = FieldMeta(label='Phone', order=3)
+    address: String | None = FieldMeta(label='Address', order=4)
 
 alchemy = ExcelAlchemy(ImporterConfig(Importer))
+
 sample = [
-    {'age': 18, 'name': '张三', 'phone': '12345678901', 'address': '北京市'},
-    {'age': 19, 'name': '李四', 'address': '上海市'},
-    {'age': 20, 'name': '王五', 'phone': '12345678901'},
+    {'age': 18, 'name': 'Bob', 'phone': '12345678901', 'address': 'New York'},
+    {'age': 19, 'name': 'Alice', 'address': 'Shanghai'},
+    {'age': 20, 'name': 'John', 'phone': '12345678901'},
 ]
 base64content = alchemy.download_template(sample)
 print(base64content)
 ```
+In the above example, we specify a sample, which is a list of dictionaries. Each dictionary represents a row in the Excel sheet, and the keys represent column names. The method returns an Excel template with default values filled in. If a field doesn't have a default value, it will be empty. For example:
+* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template_en.png)
 
-* 上面的例子中，我们指定了一个 `sample`，`sample` 是一个列表，列表中的每个元素都是一个字典，字典中的键为 Pydantic 类中的字段名，值为该字段的默认值。
-* 最终下载的 Excel 文件中，`Sheet1` 中的第一行为字段名，第二行开始为默认值，如果某个字段没有默认值，则该字段为空，如图所示：
-* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template.png)
-
-### 从 Excel 解析 Pydantic 类并创建数据
+### Parse a Pydantic class from an Excel file and create data
 
 ```python
 import asyncio
@@ -74,21 +72,21 @@ from pydantic import BaseModel
 
 
 class Importer(BaseModel):
-    age: Number = FieldMeta(label='年龄', order=1)
-    name: String = FieldMeta(label='名称', order=2)
-    phone: String | None = FieldMeta(label='电话', order=3)
-    address: String | None = FieldMeta(label='地址', order=4)
+    age: Number = FieldMeta(label='Age', order=1)
+    name: String = FieldMeta(label='Name', order=2)
+    phone: String | None = FieldMeta(label='Phone', order=3)
+    address: String | None = FieldMeta(label='Address', order=4)
 
 
 def data_converter(data: dict[str, Any]) -> dict[str, Any]:
-    """自定义数据转换器, 在这里，你可以对 Importer.dict() 的结果进行转换"""
+    """Custom data converter, here you can modify the result of Importer.dict()"""
     data['age'] = data['age'] + 1
     data['name'] = {"phone": data['phone']}
     return data
 
 
 async def create_func(data: dict[str, Any], context: None) -> Any:
-    """你定义的创建函数"""
+    """Your defined creation function"""
     # do something to create data
     return True
 
@@ -99,7 +97,7 @@ async def main():
             create_importer_model=Importer,
             creator=create_func,
             data_converter=data_converter,
-            minio=Minio(endpoint=''),  # 可访问的 minio 地址
+            minio=Minio(endpoint=''),  # reachable minio address
             bucket_name='excel',
             url_expires=3600,
         )
@@ -111,21 +109,19 @@ async def main():
 asyncio.run(main())
 ```
 
-* 导入功能的文件基于 Minio，因此在使用该功能前，你需要先安装 Minio，并且在 Minio 中创建一个 bucket，用于存放 Excel 文件。
-* 导入的 Excel 文件，必须是从 `download_template` 方法生成的 Excel 文件，否则会产生解析错误。
-* 上面的示例代码中，我们定义了一个 `data_converter` 函数，该函数用于对 `Importer.dict()` 的结果进行转换，最终返回的结果将会作为 `create_func` 函数的参数。当然，此函数是可选的，如果你不需要对数据进行转换，可以不定义该函数。
-* `create_func` 函数用于创建数据，该函数的参数为 `data_converter` 函数的返回值，`context` 为 `None`，你可以在该函数中对数据进行创建，例如，你可以将数据存入数据库中。
-* `import_data` 方法的参数 `input_excel_name` 为 Excel 文件在 Minio 中的名称，`output_excel_name` 为解析结果 Excel 文件在 Minio 中的名称，该文件包含所有输入的数据，如果某条数据解析失败，则在该条数据的第一列中会有错误信息，并且会讲产生错误的单元格标红。
-*  返回 ImportResult 类型的结果，您可以在代码中查看该类的定义，该类包含了解析结果的所有信息，例如，成功导入的数据条数、失败的数据条数、失败的数据等。
-
-一个导入结果的示例, 如图所示：
+* The importing function is based on Minio, so you need to install Minio and create a bucket to use this functionality for storing the Excel files.
+  
+* The imported Excel file must be generated by the download_template() method, otherwise, it will produce a parsing error.
+* In the above example, we define a data_converter function, which is used to modify the result of Importer.dict(). The final result of data_converter function will be the parameter of the create_func function. This function is optional if you don't need to modify the data.
+* The create_func function is used to create data, and the parameter is the result of the data_converter function, and context is None. You can create data, for example, by storing the data in a database.
+* The input_excel_name parameter of the import_data() method is the name of the Excel file in Minio, and the output_excel_name parameter is the name of the Excel file with the parsing result in Minio. This file contains all the input data, and if any data fails the parsing, the first column of that data has an error message, and the error-producing cell is highlighted in red.
+* The method returns an ImportResult type result. You can see the definition of this class in the code. This class contains all the information about the parsing result, such as the number of successfully imported data, the number of failed data, the failed data, etc.
+* An example of the importing result is shown in the following image:
 * ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/002_import_result.png)
 
 
-## 贡献
+### Contributing
+If you have any questions or suggestions regarding the ExcelAlchemy library, please raise an issue in [GitHub Issues](https://github.com/username/repo/issues). We also welcome you to submit a pull request to contribute your code.
 
-如果你在使用 ExcelAlchemy 过程中遇到了问题或者有任何建议，欢迎在 [GitHub Issues](https://github.com/username/repo/issues) 中提出。我们也非常欢迎你提交 Pull Request，贡献你的代码。
-
-## 许可证
-
-ExcelAlchemy 使用 MIT 许可证。详细信息请参阅 [LICENSE](https://github.com/username/repo/blob/main/LICENSE)。
+### License
+ExcelAlchemy is licensed under the MIT license. For more information, please see the [LICENSE](https://github.com/username/repo/blob/main/LICENSE) file.

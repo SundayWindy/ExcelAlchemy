@@ -121,7 +121,7 @@ asyncio.run(main())
 
 
 ### Contributing
-If you have any questions or suggestions regarding the ExcelAlchemy library, please raise an issue in [GitHub Issues](https://github.com/username/repo/issues). We also welcome you to submit a pull request to contribute your code.
+If you have any questions or suggestions regarding the ExcelAlchemy library, please raise an issue in [GitHub Issues](https://github.com/SundayWindy/ExcelAlchemy/issues). We also welcome you to submit a pull request to contribute your code.
 
 ### License
-ExcelAlchemy is licensed under the MIT license. For more information, please see the [LICENSE](https://github.com/username/repo/blob/main/LICENSE) file.
+ExcelAlchemy is licensed under the MIT license. For more information, please see the [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/master/LICENSE) file.

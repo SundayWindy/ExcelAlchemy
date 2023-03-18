@@ -1,4 +1,4 @@
-> [English](README.md) | 中文
+> [English](https://github.com/SundayWindy/ExcelAlchemy) | 中文
 > 
 # ExcelAlchemy 使用指南
 

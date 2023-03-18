@@ -58,7 +58,7 @@ base64content = alchemy.download_template(sample)
 print(base64content)
 ```
 In the above example, we specify a sample, which is a list of dictionaries. Each dictionary represents a row in the Excel sheet, and the keys represent column names. The method returns an Excel template with default values filled in. If a field doesn't have a default value, it will be empty. For example:
-* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template_en.png)
+* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template.png)
 
 ### Parse a Pydantic class from an Excel file and create data
 

@@ -1,3 +1,4 @@
+import os
 from random import choice
 from typing import Any
 from typing import cast
@@ -111,9 +112,9 @@ async def is_data_exist(data: dict[str, Any]) -> bool:
 class TestExcelAlchemy(IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.instance = Minio(
-            endpoint='minio.teletraan.io',
-            access_key='admin',
-            secret_key='teletraan',
+            endpoint=os.getenv('MINIO_ENDPOINT', 'localhost:9000'),
+            access_key=os.getenv('MINIO_ACCESS_KEY', 'admin'),
+            secret_key=os.getenv('MINIO_SECRET_KEY', 'admin'),
             secure=True,
         )
         self.bucket_name = 'api'

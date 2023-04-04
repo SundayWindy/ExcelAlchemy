@@ -110,14 +110,3 @@ class Option:
     # For user's usage, the name is the most important symbol
     id: OptionId
     name: str
-
-    def __eq__(self, other: Any) -> bool:
-        # for convenience, use name rather then id
-        if isinstance(other, str):
-            return self.name == other
-        else:
-            return False
-
-    def __hash__(self) -> int:
-        # for convenience, use name rather then id
-        return hash(self.name)

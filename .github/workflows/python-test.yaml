@@ -24,7 +24,8 @@ jobs:
 
       - name: Build coverage file
         run: |
-          coverage run -m pytest tests --junitxml=pytest.xml && coverage report -m > pytest-coverage.txt
+          pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=excelalchemy tests/ | tee pytest-coverage.txt
+
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main

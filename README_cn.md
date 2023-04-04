@@ -62,7 +62,7 @@ print(base64content)
 
 * 上面的例子中，我们指定了一个 `sample`，`sample` 是一个列表，列表中的每个元素都是一个字典，字典中的键为 Pydantic 类中的字段名，值为该字段的默认值。
 * 最终下载的 Excel 文件中，`Sheet1` 中的第一行为字段名，第二行开始为默认值，如果某个字段没有默认值，则该字段为空，如图所示：
-* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template.png)
+* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/main/images/001_sample_template.png)
 
 ### 从 Excel 解析 Pydantic 类并创建数据
 
@@ -121,7 +121,7 @@ asyncio.run(main())
 *  返回 ImportResult 类型的结果，您可以在代码中查看该类的定义，该类包含了解析结果的所有信息，例如，成功导入的数据条数、失败的数据条数、失败的数据等。
 
 一个导入结果的示例, 如图所示：
-* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/002_import_result.png)
+* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/main/images/002_import_result.png)
 
 
 ## 贡献
@@ -130,4 +130,4 @@ asyncio.run(main())
 
 ## 许可证
 
-ExcelAlchemy 使用 MIT 许可证。详细信息请参阅 [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/master/LICENSE)。
+ExcelAlchemy 使用 MIT 许可证。详细信息请参阅 [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/main/LICENSE)。

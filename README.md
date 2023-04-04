@@ -1,4 +1,4 @@
-> [中文](https://github.com/SundayWindy/ExcelAlchemy/blob/master/README_cn.md) | English
+> [中文](https://github.com/SundayWindy/ExcelAlchemy/blob/main/README_cn.md) | English
 > 
 
 # ExcelAlchemy User Guide
@@ -58,7 +58,7 @@ base64content = alchemy.download_template(sample)
 print(base64content)
 ```
 In the above example, we specify a sample, which is a list of dictionaries. Each dictionary represents a row in the Excel sheet, and the keys represent column names. The method returns an Excel template with default values filled in. If a field doesn't have a default value, it will be empty. For example:
-* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/001_sample_template.png)
+* ![image](https://github.com/SundayWindy/ExcelAlchemy/raw/main/images/001_sample_template.png)
 
 ### Parse a Pydantic class from an Excel file and create data
 
@@ -117,11 +117,11 @@ asyncio.run(main())
 * The `input_excel_name` parameter of the `import_data()` method is the name of the Excel file in Minio, and the `output_excel_name` parameter is the name of the Excel file with the parsing result in Minio. This file contains all the input data, and if any data fails the parsing, the first column of that data has an error message, and the error-producing cell is highlighted in red.
 * The method returns an `ImportResult` type result. You can see the definition of this class in the code. This class contains all the information about the parsing result, such as the number of successfully imported data, the number of failed data, the failed data, etc.
 * An example of the importing result is shown in the following image:
-![image](https://github.com/SundayWindy/ExcelAlchemy/raw/master/images/002_import_result.png)
+![image](https://github.com/SundayWindy/ExcelAlchemy/raw/main/images/002_import_result.png)
 
 
 ### Contributing
 If you have any questions or suggestions regarding the ExcelAlchemy library, please raise an issue in [GitHub Issues](https://github.com/SundayWindy/ExcelAlchemy/issues). We also welcome you to submit a pull request to contribute your code.
 
 ### License
-ExcelAlchemy is licensed under the MIT license. For more information, please see the [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/master/LICENSE) file.
+ExcelAlchemy is licensed under the MIT license. For more information, please see the [LICENSE](https://github.com/SundayWindy/ExcelAlchemy/blob/main/LICENSE) file.

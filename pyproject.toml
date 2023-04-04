@@ -33,6 +33,8 @@ development = [
     "pylint",
     "pre-commit",
     "pyright",
+    "pytest",
+    "coverage",
 ]
 
 [tool.pyright]

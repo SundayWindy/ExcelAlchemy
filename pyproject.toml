@@ -35,6 +35,7 @@ development = [
     "pyright",
     "pytest",
     "coverage",
+    "pytest-cov",
 ]
 
 [tool.pyright]

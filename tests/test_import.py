@@ -1,31 +1,34 @@
 import asyncio
-from typing import Any, cast
+from typing import Any
+from typing import cast
 from unittest import IsolatedAsyncioTestCase
+
 from minio import Minio
-from excelalchemy import (
-    Boolean,
-    Date,
-    DateRange,
-    Email,
-    ExcelAlchemy,
-    FieldMeta,
-    ImporterConfig,
-    Money,
-    MultiCheckbox,
-    MultiOrganization,
-    MultiStaff,
-    MultiTreeNode,
-    Number,
-    NumberRange,
-    Option,
-    PhoneNumber,
-    Radio,
-    SingleOrganization,
-    SingleStaff,
-    SingleTreeNode,
-    String, Url, ProgrammaticError,
-)
 from pydantic import BaseModel
+
+from excelalchemy import Boolean
+from excelalchemy import Date
+from excelalchemy import DateRange
+from excelalchemy import Email
+from excelalchemy import ExcelAlchemy
+from excelalchemy import FieldMeta
+from excelalchemy import ImporterConfig
+from excelalchemy import Money
+from excelalchemy import MultiCheckbox
+from excelalchemy import MultiOrganization
+from excelalchemy import MultiStaff
+from excelalchemy import MultiTreeNode
+from excelalchemy import Number
+from excelalchemy import NumberRange
+from excelalchemy import Option
+from excelalchemy import PhoneNumber
+from excelalchemy import ProgrammaticError
+from excelalchemy import Radio
+from excelalchemy import SingleOrganization
+from excelalchemy import SingleStaff
+from excelalchemy import SingleTreeNode
+from excelalchemy import String
+from excelalchemy import Url
 from tests.mock_minio import LocalMockMinio
 
 
@@ -85,5 +88,5 @@ class TestImport(IsolatedAsyncioTestCase):
 
         config = ImporterConfig(self.Importer, creator=self.create, minio=cast(Minio, self.minio))
         alchemy = ExcelAlchemy(config)
-        # template = alchemy.download_template()
-        # assert template is not None
+        template = alchemy.download_template()
+        assert template is not None

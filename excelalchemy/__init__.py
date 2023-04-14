@@ -1,12 +1,12 @@
 """A Python Library for Reading and Writing Excel Files"""
 
 __version__ = '0.1.0b5'
-
 from excelalchemy.const import CharacterSet
 from excelalchemy.const import DataRangeOption
 from excelalchemy.const import DateFormat
 from excelalchemy.const import Option
 from excelalchemy.core.alchemy import ExcelAlchemy
+from excelalchemy.exc import ConfigError
 from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ProgrammaticError
 from excelalchemy.helper.pydantic import extract_pydantic_model
@@ -50,6 +50,7 @@ __all__ = [
     'Boolean',
     'ColumnIndex',
     'Date',
+    'DateFormat',
     'DateRange',
     'Email',
     'ExcelAlchemy',
@@ -73,6 +74,7 @@ __all__ = [
     'PatchFieldMeta',
     'PhoneNumber',
     'ProgrammaticError',
+    'ConfigError',
     'Radio',
     'RowIndex',
     'SingleOrganization',

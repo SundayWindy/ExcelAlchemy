@@ -72,3 +72,7 @@ class ExcelRowError(Exception):
 
 class ProgrammaticError(Exception):
     ...
+
+
+class ConfigError(Exception):
+    ...

@@ -9,6 +9,7 @@ from pendulum import DateTime
 from excelalchemy.const import DATE_FORMAT_TO_HINT_MAPPING
 from excelalchemy.const import MILLISECOND_TO_SECOND
 from excelalchemy.const import DataRangeOption
+from excelalchemy.exc import ConfigError
 from excelalchemy.types.abstract import ABCValueType
 from excelalchemy.types.field import FieldMetaInfo
 
@@ -19,7 +20,7 @@ class Date(ABCValueType, datetime):
     @classmethod
     def comment(cls, field_meta: FieldMetaInfo) -> str:
         if not field_meta.date_format:
-            raise RuntimeError('日期格式未定义')
+            raise ConfigError('日期格式未定义')
         return '\n'.join(
             [
                 field_meta.comment_required,
@@ -36,7 +37,7 @@ class Date(ABCValueType, datetime):
             return value
 
         if not field_meta.date_format:
-            raise RuntimeError('日期格式未定义')
+            raise ConfigError('日期格式未定义')
 
         value = str(value).strip()
         try:

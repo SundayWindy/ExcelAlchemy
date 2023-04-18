@@ -458,6 +458,7 @@ class ExcelAlchemy(
                 skiprows=HEADER_HINT_LINE_COUNT,  # 跳过表头提示行
                 header=None,  # 不使用表头, 由程序自行解析
                 dtype=str,  # 读取所有数据为字符串
+                engine='openpyxl',  # 使用 openpyxl 引擎, 避免 xlrd 引擎读取 xlsx 文件时报错
             )
             file_object.close()
             self.df = df

@@ -29,9 +29,14 @@ class LocalMockMinio:
                 '出生日期': '2021-01-01',
             },
         ],
-        FileRegistry.TEST_DATE_INPUT_WRONG_FORMAT: [
+        FileRegistry.TEST_DATE_INPUT_WRONG_RANGE: [
             {
                 '出生日期': '2021-01-32',
+            },
+        ],
+        FileRegistry.TEST_DATE_INPUT_WRONG_FORMAT: [
+            {
+                '出生日期': '2021-13',
             },
         ],
     }
@@ -49,12 +54,12 @@ class LocalMockMinio:
             header_row = pandas.Series(original_header, index=df.columns)
             df = pandas.concat([header_row.to_frame().T, df], ignore_index=True)
 
-            df.loc[-1] = None
+            df.loc[-1] = 0
             df.index = df.index + 1
             df = df.sort_index()
             df.iat[0, 0] = HEADER_HINT
 
-            df.to_excel(f.name, index=False, header=False)
+            df.to_excel(f.name, index=False, header=False, engine='openpyxl')
             f.seek(0)
             data = io.BytesIO(f.read())
             f.seek(0)
@@ -80,7 +85,7 @@ class LocalMockMinio:
 
     def __del__(self):
         for filename, data in self.storage.items():
-            data['file'].close()
+            data['file'].close() if data['file'] else None
 
 
 local_minio = LocalMockMinio()

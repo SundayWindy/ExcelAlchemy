@@ -1,7 +1,7 @@
 """导入 Excel 的结果"""
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from pydantic import Field
 
 from excelalchemy.types.identity import Label
@@ -46,6 +46,7 @@ class ImportResult(BaseModel):
     result: ValidateResult = Field(description='导入结果')
 
     is_required_missing: bool = Field(default=False, description='是否缺失必填表头')
+    missing_required: list[Label] = Field(default_factory=list, description='缺失的必填表头')
     missing_primary: list[Label] = Field(default_factory=list, description='缺失的关键列')
     unrecognized: list[Label] = Field(default_factory=list, description='无法识别的表头')
     duplicated: list[Label] = Field(default_factory=list, description='重复的表头')
@@ -53,6 +54,9 @@ class ImportResult(BaseModel):
     url: str | None = Field(default=None, description='导入结果文件的下载链接, 失败时有值')
     success_count: int = Field(default=0, description='导入成功的数据条数')
     fail_count: int = Field(default=0, description='导入失败的数据条数')
+
+    class Config:
+        extra = Extra.allow
 
     @classmethod
     def from_validate_header_result(cls, result: ValidateHeaderResult) -> 'ImportResult':
@@ -65,4 +69,6 @@ class ImportResult(BaseModel):
             missing_primary=result.missing_primary,
             unrecognized=result.unrecognized,
             duplicated=result.duplicated,
+            missing_required=result.missing_required,
+
         )

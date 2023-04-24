@@ -42,6 +42,8 @@ class LocalMockMinio:
             },
         ],
         FileRegistry.TEST_DATE_RANGE_INPUT: './files/test_date_range_input.xlsx',
+        FileRegistry.TEST_DATE_RANGE_MISSING_INPUT_BEFORE: './files/test_date_range_missing_input_before.xlsx',
+        FileRegistry.TEST_DATE_RANGE_MISSING_INPUT_AFTER: './files/test_date_range_missing_input_after.xlsx',
     }
 
     def __init__(self):

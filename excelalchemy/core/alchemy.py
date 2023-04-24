@@ -739,9 +739,9 @@ class ExcelAlchemy(
     def _excel_has_merged_header(self) -> bool:
         """判断是否有合并表头
 
-        如果第 0 行有合并单元格，则一定有 nan 值，否则没有合并单元格
+        如果第 0 行有合并单元格，则一定有 nan 值或 Unnamed ，否则没有合并单元格
         """
-        return any(pandas.isna(self.header_df.iloc[0]))
+        return any(pandas.isna(self.header_df.iloc[0])) or any(self.header_df.iloc[0].str.startswith('Unnamed'))
 
     def _extract_header(self) -> list[ExcelHeader]:
         """提取表头信息"""
@@ -764,7 +764,7 @@ class ExcelAlchemy(
         for column_index, value in self.header_df.iloc[header_row_index].items():
             parent_value = value
             child_value = self.header_df.iloc[header_row_index + 1][column_index]  # type: ignore[call-overload]
-            if pandas.isna(parent_value):
+            if pandas.isna(parent_value) or parent_value.startswith('Unnamed'):
                 if pandas.isna(child_value):
                     raise ValueError('合并表头错误: 子表头不能为空')
                 current_header = ExcelHeader(

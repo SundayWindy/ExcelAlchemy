@@ -10,6 +10,8 @@ from tests.registry import FileRegistry
 
 
 class LocalMockMinio:
+    """有合并表头的内容直接使用文件"""
+
     storage: dict[str, Any] = {}
     bucket_name: str = 'test'
 
@@ -39,16 +41,21 @@ class LocalMockMinio:
                 '出生日期': '2021-13',
             },
         ],
+        FileRegistry.TEST_DATE_RANGE_INPUT: './files/test_date_range_input.xlsx',
     }
 
     def __init__(self):
-        """generate mock (NamedTemporaryFile) excel files from mock_excel_data
+        """generate mock (NamedTemporaryFile) Excel files from mock_excel_data
 
         automatically add HEADER_HINT to first row
         """
         for filename, data in self.mock_excel_data.items():
+            if isinstance(data, str):
+                df = pandas.read_excel(Path(__file__).parent / Path(data))
+            else:
+                df = pandas.DataFrame(data)
+
             f = NamedTemporaryFile(suffix='.xlsx')
-            df = pandas.DataFrame(data)
             original_header = df.columns
             df.columns = range(len(df.columns))
             header_row = pandas.Series(original_header, index=df.columns)

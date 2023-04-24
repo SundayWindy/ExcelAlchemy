@@ -322,7 +322,15 @@ class FieldMetaInfo(FieldInfo):
         return DATE_FORMAT_TO_PYTHON_MAPPING[self.must_date_format]
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(Label('{self.label}'))"
+        return (
+            f'FieldMeta(label={self.label!r}, '
+            f'order={self.order!r}, '
+            f'type={self.value_type.__name__!r}, '
+            f'required={self.required!r}, '
+            f'unique={self.unique!r}, '
+            f'comment_required={self.comment_required!r}, '
+            f'comment_unique={self.comment_unique!r})'
+        )
 
     __str__ = __repr__
 

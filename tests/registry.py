@@ -10,3 +10,5 @@ class FileRegistry(str, Enum):
     TEST_DATE_INPUT_WRONG_FORMAT = 'test_date_input_wrong_format'
 
     TEST_DATE_RANGE_INPUT = 'test_date_range_input'
+    TEST_DATE_RANGE_MISSING_INPUT_BEFORE = 'test_date_range_missing_input_before'
+    TEST_DATE_RANGE_MISSING_INPUT_AFTER = 'test_date_range_missing_input_after'

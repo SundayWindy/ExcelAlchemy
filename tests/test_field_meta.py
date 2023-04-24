@@ -304,3 +304,17 @@ class TestFieldMeta(BaseTestCase):
 
         with self.assertRaises(ConfigError):
             alchemy.ordered_field_meta[1].python_date_format  # noqa
+
+    async def test_repr(self):
+        class Importer(BaseModel):
+            email: Email = FieldMeta(
+                label='邮箱',
+                order=1,
+                unique=True,
+            )
+
+        alchemy = self.build_alchemy(Importer)
+        assert repr(alchemy.ordered_field_meta[0]) == (
+            "FieldMeta(label='邮箱', order=1, type='Email', required=True, "
+            "unique=True, comment_required='必填性：必填', comment_unique='唯一性：唯一')"
+        )

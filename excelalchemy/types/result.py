@@ -1,7 +1,8 @@
 """导入 Excel 的结果"""
 from enum import Enum
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
+from pydantic import Extra
 from pydantic import Field
 
 from excelalchemy.types.identity import Label
@@ -70,5 +71,4 @@ class ImportResult(BaseModel):
             unrecognized=result.unrecognized,
             duplicated=result.duplicated,
             missing_required=result.missing_required,
-
         )

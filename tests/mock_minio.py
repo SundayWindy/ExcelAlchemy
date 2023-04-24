@@ -44,6 +44,16 @@ class LocalMockMinio:
         FileRegistry.TEST_DATE_RANGE_INPUT: './files/test_date_range_input.xlsx',
         FileRegistry.TEST_DATE_RANGE_MISSING_INPUT_BEFORE: './files/test_date_range_missing_input_before.xlsx',
         FileRegistry.TEST_DATE_RANGE_MISSING_INPUT_AFTER: './files/test_date_range_missing_input_after.xlsx',
+        FileRegistry.TEST_EMAIL_WRONG_FORMAT: [
+            {
+                '邮箱': '123',
+            },
+        ],
+        FileRegistry.TEST_EMAIL_CORRECT_FORMAT: [
+            {
+                '邮箱': 'excelalchemy@163.com',
+            },
+        ],
     }
 
     def __init__(self):

@@ -31,7 +31,12 @@ class ExcelCellError(Exception):
         return f'【{self.label}】{self.message}'
 
     def __repr__(self):
-        return f"{type(self).__name__}(label='{self.label}', message='{self.message}')"
+        return f"{type(self).__name__}(label=Label('{self.label}'), message='{self.message}')"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ExcelCellError):
+            return NotImplemented
+        return str(self) == str(other)
 
     @property
     def unique_label(self) -> UniqueLabel:

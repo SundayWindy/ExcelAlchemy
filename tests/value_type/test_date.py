@@ -46,6 +46,8 @@ class TestValueType(BaseTestCase):
         assert isinstance(error, ExcelCellError)
         assert error.label == '出生日期'
         assert error.message == '请输入格式为yyyy/mm的日期'  # may be more accurate to say "请输入格式为yyyy/mm的日期，如2021/01"
+        assert repr(error) == "ExcelCellError(label='出生日期', message='请输入格式为yyyy/mm的日期')"
+        assert str(error) == '【出生日期】请输入格式为yyyy/mm的日期'
 
     async def test_date_wrong_format(self):
         class Importer(BaseModel):

@@ -11,7 +11,7 @@ from tests import BaseTestCase
 from tests.registry import FileRegistry
 
 
-class TestValueType(BaseTestCase):
+class TestEmail(BaseTestCase):
     async def test_email_wrong_format(self):
         class Importer(BaseModel):
             email: Email = FieldMeta(label='邮箱', order=1)
@@ -23,9 +23,7 @@ class TestValueType(BaseTestCase):
         assert result.result == ValidateResult.DATA_INVALID, '导入失败'
         assert result.fail_count == 1
         row, col, first_error = RowIndex(0), ColumnIndex(2), 0
-        assert alchemy.cell_errors[row][col][first_error] == ExcelCellError(
-            label=Label('邮箱'), message='请输入正确的邮箱'
-            )
+        assert alchemy.cell_errors[row][col][first_error] == ExcelCellError(label=Label('邮箱'), message='请输入正确的邮箱')
 
     async def test_email_correct_format(self):
         class Importer(BaseModel):

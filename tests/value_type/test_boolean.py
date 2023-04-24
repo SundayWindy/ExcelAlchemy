@@ -7,7 +7,7 @@ from tests import BaseTestCase
 from tests.registry import FileRegistry
 
 
-class TestValueType(BaseTestCase):
+class TestBoolean(BaseTestCase):
     async def test_boolean(self):
         """测试导入时，布尔值正确读取"""
 

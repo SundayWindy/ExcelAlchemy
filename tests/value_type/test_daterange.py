@@ -7,7 +7,7 @@ from tests import BaseTestCase
 from tests.registry import FileRegistry
 
 
-class TestValueType(BaseTestCase):
+class TestDateRange(BaseTestCase):
     async def test_daterange(self):
         class Importer(BaseModel):
             date_range: DateRange = FieldMeta(label='日期范围', order=1)

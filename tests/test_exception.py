@@ -3,7 +3,7 @@ from excelalchemy import Label
 from tests import BaseTestCase
 
 
-class TestValueType(BaseTestCase):
+class TestException(BaseTestCase):
     async def test_equal(self):
         exc1 = ExcelCellError(label=Label('邮箱'), message='请输入正确的邮箱')
         exc2 = ExcelCellError(label=Label('邮箱'), message='请输入正确的邮箱')
@@ -20,7 +20,7 @@ class TestValueType(BaseTestCase):
 
     async def test_str(self):
         exc1 = ExcelCellError(label=Label('邮箱'), message='请输入正确的邮箱')
-        assert str(exc1) == "【邮箱】请输入正确的邮箱"
+        assert str(exc1) == '【邮箱】请输入正确的邮箱'
 
     async def test_wrong_init(self):
         with self.assertRaises(ValueError):

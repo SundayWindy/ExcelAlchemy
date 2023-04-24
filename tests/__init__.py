@@ -27,5 +27,9 @@ class BaseTestCase(IsolatedAsyncioTestCase):
         importer: type[BaseModel],
     ) -> ExcelAlchemy:
         return ExcelAlchemy(
-            ImporterConfig(importer, creator=self.fake_creator, minio=cast(Minio, self.minio)),
+            ImporterConfig(
+                importer,
+                creator=self.fake_creator,
+                minio=cast(Minio, self.minio),
+            ),
         )

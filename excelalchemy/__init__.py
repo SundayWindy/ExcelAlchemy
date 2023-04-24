@@ -52,6 +52,7 @@ __all__ = [
     'Date',
     'DateFormat',
     'DateRange',
+    'DataRangeOption',
     'Email',
     'ExcelAlchemy',
     'ExcelCellError',

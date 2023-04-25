@@ -1,7 +1,11 @@
+from datetime import timedelta
+
 from pendulum import DateTime
+from pendulum import today
 from pendulum.tz.timezone import Timezone
 from pydantic import BaseModel
 
+from excelalchemy import DataRangeOption
 from excelalchemy import DateFormat
 from excelalchemy import DateRange
 from excelalchemy import FieldMeta
@@ -111,3 +115,85 @@ class TestDateRange(BaseTestCase):
         )
 
         assert value_type.serialize('不能解析的值', field) == '不能解析的值'
+
+    async def test_validate(self):
+        class Importer(BaseModel):
+            date_range: DateRange = FieldMeta(label='日期范围', order=1, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        value_type = DateRange(
+            DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+            end=DateTime(2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+        )
+
+        self.assertRaises(
+            ValueError,
+            value_type.__validate__,
+            {
+                'start': '2022/02/02',
+                'end': '2021/02/02',  # validate 只接受时间
+            },
+            field,
+        )
+
+        self.assertRaises(
+            ValueError,
+            value_type.__validate__,
+            {
+                'start': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),  # 开始时间晚于结束时间
+                'end': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+            },
+            field,
+        )
+
+        assert value_type.__validate__(
+            {
+                'start': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+            },
+            field,
+        ) == {
+            'start': 1643731200000,
+            'end': 1675267200000,
+        }
+
+        field.date_range_option = DataRangeOption.PRE
+
+        self.assertRaises(
+            ValueError,
+            value_type.__validate__,
+            {
+                'start': DateTime(1970, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')).add(
+                    years=today().year
+                ),  # 开始时间晚于结束时间
+                'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+            },
+            field,
+        )
+
+        field.date_range_option = DataRangeOption.NEXT
+        self.assertRaises(
+            ValueError,
+            value_type.__validate__,
+            {
+                'start': DateTime(1970, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                'end': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')).add(
+                    years=today().year
+                ),  # 开始时间晚于结束时间
+            },
+            field,
+        )
+
+        field.date_range_option = DataRangeOption.NONE
+        assert value_type.__validate__(
+            {
+                'start': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+            },
+            field,
+        ) == {
+            'start': 1643731200000,
+            'end': 1675267200000,
+        }

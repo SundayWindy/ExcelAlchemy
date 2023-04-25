@@ -325,7 +325,7 @@ class FieldMetaInfo(FieldInfo):
         return (
             f'FieldMeta(label={self.label!r}, '
             f'order={self.order!r}, '
-            f'type={self.value_type.__name__!r}, '
+            f'value_type={self.value_type.__name__!r}, '
             f'required={self.required!r}, '
             f'unique={self.unique!r}, '
             f'comment_required={self.comment_required!r}, '

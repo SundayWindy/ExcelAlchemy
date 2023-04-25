@@ -315,6 +315,6 @@ class TestFieldMeta(BaseTestCase):
 
         alchemy = self.build_alchemy(Importer)
         assert repr(alchemy.ordered_field_meta[0]) == (
-            "FieldMeta(label='邮箱', order=1, type='Email', required=True, "
+            "FieldMeta(label='邮箱', order=1, value_type='Email', required=True, "
             "unique=True, comment_required='必填性：必填', comment_unique='唯一性：唯一')"
         )

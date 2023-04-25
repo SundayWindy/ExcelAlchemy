@@ -58,7 +58,7 @@ class DateRange(ComplexABCValueType):
             [
                 field_meta.comment_required,
                 field_meta.comment_date_format,
-                f'提示：开始日期不得晚于结束日期{field_meta.hint}',
+                f'提示：开始日期不得晚于结束日期{field_meta.hint or ""}',
             ]
         )
 
@@ -92,7 +92,11 @@ class DateRange(ComplexABCValueType):
             case datetime():
                 return value
             case str():
-                datetime_value = pendulum.parse(value).replace(tzinfo=field_meta.timezone)  # type: ignore
+                try:
+                    datetime_value = pendulum.parse(value).replace(tzinfo=field_meta.timezone)  # type: ignore
+                except Exception as e:
+                    logging.warning('Could not parse value %s for field %s. Reason: %s', value, cls.__name__, e)
+                    return value
                 return datetime_value
             case _:
                 return value

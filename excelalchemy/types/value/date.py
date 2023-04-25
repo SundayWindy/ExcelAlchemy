@@ -83,7 +83,8 @@ class Date(ABCValueType, datetime):
 
     @staticmethod
     def _parse_date(v: datetime, field_meta: FieldMetaInfo) -> datetime:
-        parsed = pendulum.parse(v.strftime(field_meta.python_date_format)).replace(tzinfo=field_meta.timezone)
+        format_ = field_meta.python_date_format
+        parsed = pendulum.parse(v.strftime(format_)).replace(tzinfo=field_meta.timezone)  # type: ignore
         return parsed
 
     @staticmethod

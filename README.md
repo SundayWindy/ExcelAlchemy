@@ -2,8 +2,7 @@
 >
 
 # ExcelAlchemy User Guide
-# 📊 ExcelAlchemy
-
+# 📊 ExcelAlchemy [![codecov](https://codecov.io/gh/SundayWindy/ExcelAlchemy/branch/main/graph/badge.svg?token=F6QVKL37XH)](https://codecov.io/gh/SundayWindy/ExcelAlchemy)
 ExcelAlchemy is a Python library that allows you to download Excel files from Minio, parse user inputs, and generate corresponding Pydantic classes. It also allows you to generate Excel files based on Pydantic classes for easy user downloads.
 
 ## Installation

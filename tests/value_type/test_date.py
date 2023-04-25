@@ -1,6 +1,8 @@
 from typing import cast
-
+from decimal import Decimal
 from minio import Minio
+from pendulum import DateTime
+from pendulum.tz.timezone import Timezone
 from pydantic import BaseModel
 
 from excelalchemy import ConfigError
@@ -64,3 +66,32 @@ class TestDate(BaseTestCase):
         assert isinstance(error, ExcelCellError)
         assert error.label == '出生日期'
         assert error.message == '请输入格式为yyyy/mm/dd的日期'
+
+    async def test_date_serialize(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        assert field.value_type.serialize('', field) == ''
+        assert field.value_type.serialize('2022-02-02', field) == DateTime(
+            2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')
+        )
+        assert field.value_type.serialize('2022-02-02 12:12:12', field) == DateTime(
+            2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+        )
+        assert field.value_type.serialize('2022-02-02 25:00:00', field) == '2022-02-02 25:00:00'
+
+    async def test_deserialize(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        assert field.value_type.deserialize('', field) == ''
+        assert field.value_type.deserialize('2022-02-02', field) == '2022-02-02'
+        assert field.value_type.deserialize('2022-02-02 12:12:12', field) == '2022-02-02 12:12:12'
+        assert field.value_type.deserialize(1682408817000, field) == '2023-04-25'
+        assert field.value_type.deserialize(Decimal('1682408817000'), field) == '1682408817000'

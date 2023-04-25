@@ -50,8 +50,6 @@ class ExcelCellError(Exception):
     def _validate(self) -> None:
         if not self.label:
             raise ValueError('label 不能为空')
-        if not self.message:
-            raise ValueError('message 不能为空')
 
 
 class ExcelRowError(Exception):
@@ -72,7 +70,7 @@ class ExcelRowError(Exception):
         return self.message
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.message})'
+        return f"{type(self).__name__}(message='{self.message}')"
 
 
 class ProgrammaticError(Exception):

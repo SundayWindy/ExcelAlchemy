@@ -68,7 +68,7 @@ class Date(ABCValueType, datetime):
     @classmethod
     def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> int:
         if field_meta.date_format is None:
-            raise RuntimeError('日期格式未定义')
+            raise ConfigError('日期格式未定义')
 
         if not isinstance(value, datetime):
             raise ValueError(f'请输入格式为{DATE_FORMAT_TO_HINT_MAPPING[field_meta.date_format]}的日期')

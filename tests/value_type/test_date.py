@@ -83,6 +83,9 @@ class TestDate(BaseTestCase):
             2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
         )
         assert field.value_type.serialize('2022-02-02 25:00:00', field) == '2022-02-02 25:00:00'
+        assert field.value_type.serialize(
+            DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field
+        ) == DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai'))
 
     async def test_deserialize(self):
         class Importer(BaseModel):
@@ -91,11 +94,16 @@ class TestDate(BaseTestCase):
         alchemy = self.build_alchemy(Importer)
         field = alchemy.ordered_field_meta[0]
 
+        field.value_type = cast(Date, field.value_type)
         assert field.value_type.deserialize('', field) == ''
         assert field.value_type.deserialize('2022-02-02', field) == '2022-02-02'
         assert field.value_type.deserialize('2022-02-02 12:12:12', field) == '2022-02-02 12:12:12'
         assert field.value_type.deserialize(1682408817000, field) == '2023-04-25'
         assert field.value_type.deserialize(Decimal('1682408817000'), field) == '1682408817000'
+        assert (
+            field.value_type.deserialize(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
+            == '2022-02-02'
+        )
 
     async def test_validate_day(self):
         class Importer(BaseModel):
@@ -138,6 +146,8 @@ class TestDate(BaseTestCase):
             field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
             == 1640966400000
         )
+        field.date_format = None
+        self.assertRaises(ConfigError, field.value_type.__validate__, '2022-02-02', field)
 
     async def test_validate_minute(self):
         class Importer(BaseModel):

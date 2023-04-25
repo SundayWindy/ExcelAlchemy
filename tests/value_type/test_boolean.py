@@ -47,3 +47,4 @@ class TestBoolean(BaseTestCase):
         assert field.value_type.__validate__('否', field) is False
 
         self.assertRaises(ValueError, field.value_type.__validate__, '任何无法识别的值', field)
+        self.assertRaises(ValueError, field.value_type.__validate__, '', field)

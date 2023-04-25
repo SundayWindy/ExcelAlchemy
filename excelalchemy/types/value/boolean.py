@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 from typing import Any
 
 from excelalchemy.types.abstract import ABCValueType
@@ -48,17 +47,9 @@ class Boolean(ABCValueType):
         if isinstance(value, bool):
             return value
 
-        try:
-            value_str = str(value)
-        except Exception as error:
-            raise ValueError('请输入“是”或“否”') from error
+        value_str = str(value)
 
         if value_str not in ('是', '否'):
             raise ValueError('请输入“是”或“否”')
 
         return value_str == '是'
-
-
-if TYPE_CHECKING:
-    # pyright: reportGeneralTypeIssues=false
-    Boolean = bool  # type: ignore

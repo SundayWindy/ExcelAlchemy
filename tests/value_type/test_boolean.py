@@ -33,3 +33,17 @@ class TestBoolean(BaseTestCase):
         assert field.value_type.deserialize('否', field) == '否'
         assert field.value_type.deserialize('任何无法识别的值', field) == '任何无法识别的值'
         assert field.value_type.deserialize('', field) == '否'
+        assert field.value_type.deserialize(1, field) == '否'
+
+    async def test_validate(self):
+        class Importer(BaseModel):
+            is_active: Boolean = FieldMeta(label='是否启用', order=1)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        assert field.value_type.__validate__(True, field)
+        assert field.value_type.__validate__(False, field) is False
+        assert field.value_type.__validate__('是', field)
+        assert field.value_type.__validate__('否', field) is False
+
+        self.assertRaises(ValueError, field.value_type.__validate__, '任何无法识别的值', field)

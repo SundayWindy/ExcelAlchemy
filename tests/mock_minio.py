@@ -1,4 +1,5 @@
 import io
+from copy import copy
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
@@ -100,7 +101,7 @@ class LocalMockMinio:
 
     def get_object(self, bucket_name: str, filename: str) -> io.BytesIO:
         assert bucket_name is not None
-        return self.storage[filename]['data']
+        return copy(self.storage[filename]['data'])  # use copy to avoid close(), so it can be read multiple times
 
     def __del__(self):
         for filename, data in self.storage.items():

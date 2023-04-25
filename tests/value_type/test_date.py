@@ -106,11 +106,10 @@ class TestDate(BaseTestCase):
         field.value_type = cast(Date, field.value_type)
 
         self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
-        assert field.value_type.__validate__(
-            DateTime(
-                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
-            ), field
-        ) == 1643731200000
+        assert (
+            field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
+            == 1643731200000
+        )
 
     async def test_validate_month(self):
         class Importer(BaseModel):
@@ -121,11 +120,10 @@ class TestDate(BaseTestCase):
         field.value_type = cast(Date, field.value_type)
 
         self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
-        assert field.value_type.__validate__(
-            DateTime(
-                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
-            ), field
-        ) == 1643644800000
+        assert (
+            field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
+            == 1643644800000
+        )
 
     async def test_validate_year(self):
         class Importer(BaseModel):
@@ -136,11 +134,10 @@ class TestDate(BaseTestCase):
         field.value_type = cast(Date, field.value_type)
 
         self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
-        assert field.value_type.__validate__(
-            DateTime(
-                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
-            ), field
-        ) == 1640966400000
+        assert (
+            field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
+            == 1640966400000
+        )
 
     async def test_validate_minute(self):
         class Importer(BaseModel):
@@ -151,8 +148,7 @@ class TestDate(BaseTestCase):
         field.value_type = cast(Date, field.value_type)
 
         self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
-        assert field.value_type.__validate__(
-            DateTime(
-                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
-            ), field
-        ) == 1643775120000
+        assert (
+            field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
+            == 1643775120000
+        )

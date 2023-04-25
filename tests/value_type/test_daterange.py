@@ -1,5 +1,8 @@
+from pendulum import DateTime
+from pendulum.tz.timezone import Timezone
 from pydantic import BaseModel
 
+from excelalchemy import DateFormat
 from excelalchemy import DateRange
 from excelalchemy import FieldMeta
 from excelalchemy import ValidateResult
@@ -55,3 +58,56 @@ class TestDateRange(BaseTestCase):
         assert result.result == ValidateResult.HEADER_INVALID, '导入失败'
         assert sorted(result.missing_required) == sorted(['结束日期'])
         assert result.unrecognized == ['日期范围']
+
+    async def test_daterange_value_type(self):
+        class Importer(BaseModel):
+            date_range: DateRange = FieldMeta(label='日期范围', order=1, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        value_type = DateRange(
+            DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+            end=DateTime(2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+        )
+
+        assert value_type.start == DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai'))
+        assert value_type.end == DateTime(2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai'))
+        assert value_type.comment(field) == '必填性：必填\n格式：日期（yyyy/mm/dd）\n提示：开始日期不得晚于结束日期'
+
+    async def test_serialize(self):
+        class Importer(BaseModel):
+            date_range: DateRange = FieldMeta(label='日期范围', order=1, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        value_type = DateRange(
+            DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+            end=DateTime(2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+        )
+
+        assert value_type.serialize(
+            {
+                'start': '2022/02/02',
+                'end': '2023/02/02',
+            },
+            field,
+        ) == {
+            'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+            'start': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+        }
+
+        assert value_type.serialize(DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')), field) == DateTime(
+            2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')
+        )
+
+        assert value_type.serialize('2023/02/02', field) == DateTime(
+            2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')
+        )
+
+        assert value_type.serialize('2023/02/02 12:12:12', field) == DateTime(
+            2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+        )
+
+        assert value_type.serialize('不能解析的值', field) == '不能解析的值'

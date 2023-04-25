@@ -1,5 +1,6 @@
-from typing import cast
 from decimal import Decimal
+from typing import cast
+
 from minio import Minio
 from pendulum import DateTime
 from pendulum.tz.timezone import Timezone
@@ -95,3 +96,63 @@ class TestDate(BaseTestCase):
         assert field.value_type.deserialize('2022-02-02 12:12:12', field) == '2022-02-02 12:12:12'
         assert field.value_type.deserialize(1682408817000, field) == '2023-04-25'
         assert field.value_type.deserialize(Decimal('1682408817000'), field) == '1682408817000'
+
+    async def test_validate_day(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(Date, field.value_type)
+
+        self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
+        assert field.value_type.__validate__(
+            DateTime(
+                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+            ), field
+        ) == 1643731200000
+
+    async def test_validate_month(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.MONTH)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(Date, field.value_type)
+
+        self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
+        assert field.value_type.__validate__(
+            DateTime(
+                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+            ), field
+        ) == 1643644800000
+
+    async def test_validate_year(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.YEAR)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(Date, field.value_type)
+
+        self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
+        assert field.value_type.__validate__(
+            DateTime(
+                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+            ), field
+        ) == 1640966400000
+
+    async def test_validate_minute(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.MINUTE)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(Date, field.value_type)
+
+        self.assertRaises(ValueError, field.value_type.__validate__, '2022-02-02', field)
+        assert field.value_type.__validate__(
+            DateTime(
+                2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')
+            ), field
+        ) == 1643775120000

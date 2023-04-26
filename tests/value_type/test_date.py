@@ -3,10 +3,12 @@ from typing import cast
 
 from minio import Minio
 from pendulum import DateTime
+from pendulum import today
 from pendulum.tz.timezone import Timezone
 from pydantic import BaseModel
 
 from excelalchemy import ConfigError
+from excelalchemy import DataRangeOption
 from excelalchemy import Date
 from excelalchemy import DateFormat
 from excelalchemy import ExcelAlchemy
@@ -161,4 +163,35 @@ class TestDate(BaseTestCase):
         assert (
             field.value_type.__validate__(DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')), field)
             == 1643775120000
+        )
+
+    async def test_daterange_option(self):
+        class Importer(BaseModel):
+            birth_date: Date = FieldMeta(label='出生日期', order=6, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        field.date_range_option = DataRangeOption.NEXT
+
+        self.assertRaises(
+            ValueError,
+            field.value_type.__validate__,
+            '2022-02-02',
+            field,
+        )
+
+        field.date_range_option = DataRangeOption.PRE
+
+        self.assertRaises(
+            ValueError,
+            field.value_type.__validate__,
+            DateTime(1970, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')).add(today().year),
+            field,
+        )
+
+        field.date_range_option = DataRangeOption.NONE
+        assert field.value_type.__validate__(
+            DateTime(1970, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')).add(today().year),
+            field,
         )

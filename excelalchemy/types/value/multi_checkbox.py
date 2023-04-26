@@ -43,7 +43,7 @@ class MultiCheckbox(ABCValueType, list[str]):
             raise ValueError('选项不存在，请参照表头的注释填写')
 
         if field_meta.options is None:
-            raise ProgrammaticError('options cannot be None when validate RADIO, MULTI_CHECKBOX and SELECT')
+            raise ProgrammaticError(f'options cannot be None when validate {cls.__name__}')
 
         if not field_meta.options:  # empty
             logging.warning('类型【%s】的字段【%s】的选项为空, 将返回原值', cls.__name__, field_meta.label)

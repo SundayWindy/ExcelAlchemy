@@ -197,3 +197,43 @@ class TestDateRange(BaseTestCase):
             'start': 1643731200000,
             'end': 1675267200000,
         }
+
+    async def test_deserialize(self):
+        class Importer(BaseModel):
+            date_range: DateRange = FieldMeta(label='日期范围', order=1, date_format=DateFormat.DAY)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        value_type = DateRange(
+            DateTime(2022, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+            end=DateTime(2023, 2, 2, 12, 12, 12, tzinfo=Timezone('Asia/Shanghai')),
+        )
+
+        assert value_type.deserialize(None, field) == ''
+        assert value_type.deserialize('已经是str', field) == '已经是str'
+        assert (
+            value_type.deserialize(DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')), field)
+            == '2023-02-02'
+        )
+        assert (
+            value_type.deserialize(
+                {
+                    'start': DateTime(2022, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                    'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                },
+                field,
+            )
+            == '2022-02-02 - 2023-02-02'
+        )
+
+        assert (
+            value_type.deserialize(
+                {
+                    'start': '无法解析的值',
+                    'end': DateTime(2023, 2, 2, 0, 0, 0, tzinfo=Timezone('Asia/Shanghai')),
+                },
+                field,
+            )
+            == '无法解析的值 - 2023-02-02'
+        )

@@ -149,12 +149,21 @@ class DateRange(ComplexABCValueType):
             return value.strftime(py_date_format)
 
         if isinstance(value, dict):
-            start, end = value['start'], value['end']
-            if isinstance(start, (int, float)):
-                start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
-            if isinstance(end, (int, float)):
-                end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
-            return start + ' - ' + end
+            return cls.__deserialize__dict(py_date_format, value)
 
         logging.warning('%s 反序列化失败，返回原值', cls.__name__)
         return value if value is not None else ''
+
+    @classmethod
+    def __deserialize__dict(cls, py_date_format: str, value: dict[str, Any]) -> str:
+        start, end = value['start'], value['end']
+        if isinstance(start, datetime):
+            start = start.strftime(py_date_format)
+        elif isinstance(start, (int, float)):
+            start = datetime.fromtimestamp(start / MILLISECOND_TO_SECOND).strftime(py_date_format)
+
+        if isinstance(end, datetime):
+            end = end.strftime(py_date_format)
+        elif isinstance(end, (int, float)):
+            end = datetime.fromtimestamp(end / MILLISECOND_TO_SECOND).strftime(py_date_format)
+        return start + ' - ' + end

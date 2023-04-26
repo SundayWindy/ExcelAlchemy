@@ -36,3 +36,12 @@ class TestEmail(BaseTestCase):
         assert result.result == ValidateResult.SUCCESS, '导入失败'
         assert result.fail_count == 0
         assert result.success_count == 1
+
+    async def test_validate(self):
+        class Importer(BaseModel):
+            email: Email = FieldMeta(label='邮箱', order=1)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+
+        self.assertRaises(ValueError, field.value_type.__validate__, 'ddd', field)

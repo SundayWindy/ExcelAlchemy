@@ -96,8 +96,10 @@ class TestNumber(BaseTestCase):
         field.importer_le = 2
         assert field.value_type.__validate__(1, field) == 1
         assert field.value_type.__validate__(2, field) == 2
+        self.assertRaises(ValueError, field.value_type.__validate__, 3, field)
 
         field.importer_ge = 1
         field.importer_le = None
         assert field.value_type.__validate__(1, field) == 1
         assert field.value_type.__validate__(2, field) == 2
+        self.assertRaises(ValueError, field.value_type.__validate__, 0, field)

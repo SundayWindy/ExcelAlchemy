@@ -10,6 +10,7 @@ from typing import Awaitable
 from typing import Callable
 from typing import Generator
 from typing import Iterable
+from typing import Type
 from typing import cast
 
 import pandas
@@ -32,6 +33,7 @@ from excelalchemy.core.abstract import ABCExcelAlchemy
 from excelalchemy.core.writer import render_data_excel
 from excelalchemy.core.writer import render_merged_header_excel
 from excelalchemy.core.writer import render_simple_header_excel
+from excelalchemy.exc import ConfigError
 from excelalchemy.exc import ExcelCellError
 from excelalchemy.exc import ExcelRowError
 from excelalchemy.helper.pydantic import extract_pydantic_model
@@ -235,12 +237,11 @@ class ExcelAlchemy(
 
     def export(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> Base64Str:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
-        assert isinstance(self.config, ExporterConfig)  # only for type check
+        if self.excel_mode == ExcelMode.IMPORT:
+            logging.info('导出模式为导入模式, 调用导出方法时自动切换为导出模式')
 
-        if self.excel_mode != ExcelMode.EXPORT:
-            raise RuntimeError('只支持导出模式调用此方法')
         input_keys = keys or [x.unique_key for x in self.ordered_field_meta]
-        model_keys = cast(list[Key], self.config.exporter_model.__fields__.keys())
+        model_keys = cast(list[Key], self.exporter_model.__fields__.keys())
         if unrecognized := (set(input_keys) - set(model_keys)):
             logging.warning('导出的列 {%s} 不在模型 {%s} 中', unrecognized, model_keys)
 
@@ -305,6 +306,24 @@ class ExcelAlchemy(
             if input_excel_label.label != input_excel_label.parent_label:
                 return 1
         return 0
+
+    @property
+    def exporter_model(self) -> Type[ExporterModelT]:
+        if self.config is None:
+            raise RuntimeError('请先设置转换模型配置')
+
+        if isinstance(self.config, ImporterConfig):
+            if self.config.create_importer_model and self.config.update_importer_model:
+                raise ConfigError('从导入模型推断导出模型失败, 请手动设置导出模型')
+            if self.config.create_importer_model:
+                logging.info('从导入模型推断导出模型, 请确认此操作符合预期,使用的是 create_importer_model')
+                return cast(Type[ExporterModelT], self.config.create_importer_model)
+            if self.config.update_importer_model:
+                logging.info('从导入模型推断导出模型, 请确认此操作符合预期,使用的是 update_importer_model')
+                return cast(Type[ExporterModelT], self.config.update_importer_model)
+            raise ConfigError('从导入模型推断导出模型失败, 请手动设置导出模型')
+
+        return self.config.exporter_model
 
     def has_merged_header(self, selected_keys: list[UniqueKey]) -> bool:
         """检查导出的键是否有合并的表头"""

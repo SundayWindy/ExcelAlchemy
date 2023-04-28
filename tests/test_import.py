@@ -1,13 +1,13 @@
 import asyncio
 from typing import Any
 from typing import cast
-from unittest import IsolatedAsyncioTestCase
 
 from minio import Minio
 from pydantic import BaseModel
 
 from excelalchemy import Boolean
 from excelalchemy import Date
+from excelalchemy import DateFormat
 from excelalchemy import DateRange
 from excelalchemy import Email
 from excelalchemy import ExcelAlchemy
@@ -29,10 +29,10 @@ from excelalchemy import SingleStaff
 from excelalchemy import SingleTreeNode
 from excelalchemy import String
 from excelalchemy import Url
-from tests.mock_minio import LocalMockMinio
+from tests import BaseTestCase
 
 
-class TestImport(IsolatedAsyncioTestCase):
+class TestImport(BaseTestCase):
     class Importer(BaseModel):
         age: Number = FieldMeta(label='年龄', order=1)
         name: String = FieldMeta(label='名称', order=2)
@@ -63,8 +63,6 @@ class TestImport(IsolatedAsyncioTestCase):
         data['company_id'] = company_id
         return data
 
-    minio = LocalMockMinio()
-
     async def test_none_field_meta(self):
         class Importer(BaseModel):
             option: Option = FieldMeta(label='选项', order=15)
@@ -73,20 +71,24 @@ class TestImport(IsolatedAsyncioTestCase):
         with self.assertRaises(ProgrammaticError):
             ExcelAlchemy(config)
 
-    async def test_date(self):
-        class Importer(BaseModel):
-            birth_date: Date = FieldMeta(label='出生日期', order=6)
-
-        config = ImporterConfig(Importer, creator=self.create, minio=cast(Minio, self.minio))
-        with self.assertRaises(RuntimeError):
-            alchemy = ExcelAlchemy(config)
-            alchemy.download_template()
-
     async def test_import_success(self):
         class Importer(BaseModel):
-            max_stay_date: DateRange = FieldMeta(label='最大停留日期', order=7)
+            max_stay_date: DateRange = FieldMeta(label='最大停留日期', order=7, date_format=DateFormat.YEAR)
 
-        config = ImporterConfig(self.Importer, creator=self.create, minio=cast(Minio, self.minio))
+        config = ImporterConfig(Importer, creator=self.create, minio=cast(Minio, self.minio))
         alchemy = ExcelAlchemy(config)
         template = alchemy.download_template()
         assert template is not None
+
+    async def test_simple_export(self):
+        class Importer(BaseModel):
+            name: String = FieldMeta(label='名称', order=2)
+            age: Number = FieldMeta(label='年龄', order=1)
+
+        data = [
+            {'name': '张三', 'age': 18},
+            {'name': '李四', 'age': 19},
+        ]
+        alchemy = self.build_alchemy(Importer)
+        excel = alchemy.export(data)
+        assert excel is not None

@@ -14,11 +14,7 @@ class HttpUrlValidator(BaseModel):
 class Url(String):
     @classmethod
     def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> str:
-        try:
-            parsed = str(value)
-        except Exception as exc:
-            raise ValueError('请输入正确的网址') from exc
-
+        parsed = str(value)
         errors: list[str] = []
 
         try:

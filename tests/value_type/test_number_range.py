@@ -45,3 +45,47 @@ class TestNumberRange(BaseTestCase):
             'start': 1.23,
             'end': 1.23,
         }
+
+    async def test_deserialize(self):
+        class Importer(BaseModel):
+            number: NumberRange = FieldMeta(label='数字', order=1)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(NumberRange, field.value_type)
+
+        assert field.value_type.deserialize(1.23, field) == '1.23'
+
+        field.fraction_digits = 2
+        assert field.value_type.deserialize(1.2345, field) == '1.23'
+
+    async def test_validate(self):
+        class Importer(BaseModel):
+            number: NumberRange = FieldMeta(label='数字', order=1)
+
+        alchemy = self.build_alchemy(Importer)
+        field = alchemy.ordered_field_meta[0]
+        field.value_type = cast(NumberRange, field.value_type)
+
+        assert field.value_type.__validate__(
+            {
+                'start': 1.23,
+                'end': 1.23,
+            },
+            field,
+        ) == NumberRange(start=1.23, end=1.23)
+
+        field.fraction_digits = 2
+        assert field.value_type.__validate__(
+            {
+                'start': 1.2346,
+                'end': 1.23456,
+            },
+            field,
+        ) == NumberRange(start=1.23, end=1.23)
+
+        field.fraction_digits = 0
+        assert field.value_type.__validate__(
+            NumberRange(start=1.23, end=1.23),
+            field,
+        ) == NumberRange(start=1, end=1)

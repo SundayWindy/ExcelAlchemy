@@ -85,7 +85,9 @@ class NumberRange(ComplexABCValueType):
     @staticmethod
     def __maybe_number_range__(value: dict[str, Decimal] | Any, field_meta: FieldMetaInfo) -> 'NumberRange':
         if isinstance(value, NumberRange):
-            return value
+            start = canonicalize_decimal(Decimal(str(value.start)), field_meta.fraction_digits)
+            end = canonicalize_decimal(Decimal(str(value.end)), field_meta.fraction_digits)
+            return NumberRange(start, end)
 
         if isinstance(value, dict):
             try:
@@ -95,4 +97,4 @@ class NumberRange(ComplexABCValueType):
             except Exception as exc:
                 raise ValueError('请输入数字') from exc
 
-        raise ValueError('请输入数字')
+        raise ValueError('请输入符合格式的数字')

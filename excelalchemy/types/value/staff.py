@@ -48,11 +48,7 @@ class MultiStaff(MultiCheckbox):
 
     @classmethod
     def serialize(cls, value: str | list[str] | Any, field_meta: FieldMetaInfo) -> Any:
-        if isinstance(value, str):
-            return value.strip()
-        if isinstance(value, list):
-            return MULTI_CHECKBOX_SEPARATOR.join(str(x) for x in value)
-        return value if value is not None else ''
+        return super().serialize(value, field_meta)
 
     @classmethod
     def __validate__(cls, value: Any, field_meta: FieldMetaInfo) -> list[str]:

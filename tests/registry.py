@@ -15,3 +15,6 @@ class FileRegistry(str, Enum):
 
     TEST_EMAIL_WRONG_FORMAT = 'test_email_wrong_format'
     TEST_EMAIL_CORRECT_FORMAT = 'test_email_correct_format'
+
+    TEST_SIMPLE_IMPORT = 'test_simple_import'
+    TEST_SIMPLE_IMPORT_WITH_ERROR = 'test_simple_import_with_error'

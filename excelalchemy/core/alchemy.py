@@ -90,13 +90,8 @@ class ExcelAlchemy(
 ):
     def __init__(
         self,
-        config: ImporterConfig[
-            ContextT,
-            ImporterCreateModelT,
-            ImporterUpdateModelT,
-        ]
-        | ExporterConfig[ExporterModelT],
-    ) -> None:
+        config: ImporterConfig[ContextT, ImporterCreateModelT, ImporterUpdateModelT] | ExporterConfig[ExporterModelT],
+    ):
         self.df = DataFrame()  # 初始化一个空的DataFrame
         self.header_df = DataFrame()  # 初始化一个空的DataFrame
         self.config: ImporterConfig[
@@ -237,22 +232,7 @@ class ExcelAlchemy(
 
     def export(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> Base64Str:
         """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
-        if self.excel_mode == ExcelMode.IMPORT:
-            logging.info('导出模式为导入模式, 调用导出方法时自动切换为导出模式')
-
-        input_keys = keys or [x.unique_key for x in self.ordered_field_meta]
-        model_keys = cast(list[Key], self.exporter_model.__fields__.keys())
-        if unrecognized := (set(input_keys) - set(model_keys)):
-            logging.warning('导出的列 {%s} 不在模型 {%s} 中', unrecognized, model_keys)
-
-        intersection_keys = list(set(input_keys).intersection(set(model_keys)))
-        selected_keys = self._select_output_excel_keys(intersection_keys)
-        has_merged_header = self.has_merged_header(selected_keys)
-        if has_merged_header:
-            df = self._export_with_merged_header(data, selected_keys, self.config.data_converter)
-        else:
-            df = self._export_with_simple_header(data, selected_keys, self.config.data_converter)
-
+        df, has_merged_header = self._gen_export_df(data, keys)
         return render_data_excel(
             df,
             errors={},  # 数据导出没有错误
@@ -345,6 +325,26 @@ class ExcelAlchemy(
             return [x.label for x in self.ordered_field_meta]
         else:
             return [self.unique_key_to_field_meta[key].label for key in selected_keys]
+
+    def _gen_export_df(self, data: list[dict[str, Any]], keys: list[Key] | None = None) -> tuple[DataFrame, bool]:
+        """导出数据, keys 控制导出的列, 如果为 None, [] 则导出所有列"""
+        if self.excel_mode == ExcelMode.IMPORT:
+            logging.info('导出模式为导入模式, 调用导出方法时自动切换为导出模式')
+
+        input_keys = keys or [x.unique_key for x in self.ordered_field_meta]
+        model_keys = cast(list[Key], self.exporter_model.__fields__.keys())
+        if unrecognized := (set(input_keys) - set(model_keys)):
+            logging.warning('导出的列 {%s} 不在模型 {%s} 中', unrecognized, model_keys)
+
+        intersection_keys = list(set(input_keys).intersection(set(model_keys)))
+        selected_keys = self._select_output_excel_keys(intersection_keys)
+        has_merged_header = self.has_merged_header(selected_keys)
+        if has_merged_header:
+            df = self._export_with_merged_header(data, selected_keys, self.config.data_converter)
+        else:
+            df = self._export_with_simple_header(data, selected_keys, self.config.data_converter)
+
+        return df, has_merged_header
 
     def _validate_header(self, input_excel_name: str) -> ValidateHeaderResult:
         """验证表头"""
@@ -805,3 +805,6 @@ class ExcelAlchemy(
         if key == 'config' and hasattr(self, 'config') and self.config is not None:
             raise ValueError(f'{self.__class__.__name__} 已经被实例化, config 不能被修改')
         object.__setattr__(self, key, value)
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(config={self.config!r})'

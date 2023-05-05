@@ -15,6 +15,7 @@ from excelalchemy.const import ContextT
 from excelalchemy.const import ExporterModelT
 from excelalchemy.const import ImporterCreateModelT
 from excelalchemy.const import ImporterUpdateModelT
+from excelalchemy.exc import ConfigError
 from excelalchemy.util.convertor import export_data_converter
 from excelalchemy.util.convertor import import_data_converter
 
@@ -56,7 +57,7 @@ class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModel
 
     def validate_model(self):
         if self.import_mode not in ImportMode.__members__.values():
-            raise ValueError(f'导入模式 {self.import_mode} 不合法')
+            raise ConfigError(f'导入模式 {self.import_mode} 不合法')
 
         match self.import_mode:
             case ImportMode.CREATE:
@@ -71,31 +72,31 @@ class ImporterConfig(Generic[ContextT, ImporterCreateModelT, ImporterUpdateModel
     # 创建模式验证
     def _validate_create(self):
         if self.import_mode != ImportMode.CREATE:
-            raise ValueError(f'导入模式 {self.import_mode} 不合法')
+            raise ConfigError(f'导入模式 {self.import_mode} 不合法')
         if not self.create_importer_model:
-            raise ValueError('当选择【创建模式】时，创建模型不能为空')
+            raise ConfigError('当选择【创建模式】时，创建模型不能为空')
 
     # 更新模式验证
     def _validate_update(self):
         if self.import_mode != ImportMode.UPDATE:
-            raise ValueError(f'导入模式 {self.import_mode} 不合法')
+            raise ConfigError(f'导入模式 {self.import_mode} 不合法')
         if not self.update_importer_model:
-            raise ValueError('当选择【更新模式】时，更新模型不能为空')
+            raise ConfigError('当选择【更新模式】时，更新模型不能为空')
 
     # 创建或更新模式验证
     def _validate_create_or_update(self):
         if self.import_mode != ImportMode.CREATE_OR_UPDATE:
-            raise ValueError(f'导入模式 {self.import_mode} 不合法')
+            raise ConfigError(f'导入模式 {self.import_mode} 不合法')
 
         if not self.create_importer_model:
-            raise ValueError('当选择【创建或更新模式】时，创建模型不能为空')
+            raise ConfigError('当选择【创建或更新模式】时，创建模型不能为空')
         if not self.update_importer_model:
-            raise ValueError('当选择【创建或更新模式】时，更新模型不能为空')
+            raise ConfigError('当选择【创建或更新模式】时，更新模型不能为空')
         if not self.is_data_exist:
-            raise ValueError('当选择【创建或更新模式】时，数据存在判断函数不能为空')
+            raise ConfigError('当选择【创建或更新模式】时，数据存在判断函数不能为空')
         # 创建模型和更新模型的字段必须一致
         if self.create_importer_model.__fields__.keys() != self.update_importer_model.__fields__.keys():
-            raise ValueError('创建模型和更新模型的字段名称必须一致')
+            raise ConfigError('创建模型和更新模型的字段名称必须一致')
 
     def __post_init__(self):
         self.validate_model()

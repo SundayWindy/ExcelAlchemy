@@ -36,8 +36,8 @@ class TestMultiStaff(BaseTestCase):
         field = alchemy.ordered_field_meta[0]
         field.value_type = cast(MultiStaff, field.value_type)
 
-        assert field.value_type.serialize('张三/001、李四/002', field) == '张三/001、李四/002'
-        assert field.value_type.serialize('1,2', field) == '1,2'
+        assert field.value_type.serialize('张三/001、李四/002', field) == ['张三/001、李四/002']
+        assert field.value_type.serialize('1,2', field) == ['1,2']
 
     async def test_deserialize(self):
         class Importer(BaseModel):

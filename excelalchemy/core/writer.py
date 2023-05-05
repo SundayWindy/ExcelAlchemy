@@ -253,7 +253,7 @@ def _write_merged_header(  # pragma: no mccabe
     )
     # 第一遍遍历，找出纵向合并的单元格
     start_row = row_write_offset + OPENPYXL_EXCEL_INDEX_START_AT
-    _write_vertically_merged_header(row_write_offset, df, column_write_offset, field_meta_mapping, worksheet)
+    _write_vertically_merged_header(start_row, df, column_write_offset, field_meta_mapping, worksheet)
     # 第二遍遍历，找出横向合并的单元格
     _write_horizontally_merged_header(start_row, df, column_write_offset, field_meta_mapping, worksheet)
 

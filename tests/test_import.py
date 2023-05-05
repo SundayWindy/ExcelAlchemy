@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import random
 from typing import Any
 from typing import cast
 
@@ -200,9 +201,9 @@ class TestImport(BaseTestCase):
             ],
         )
 
-    class Importer(NoMergeHeaderImporter):
-        max_stay_date: DateRange = FieldMeta(label='最大停留日期', order=7, date_format=DateFormat.YEAR)
-        salary: NumberRange = FieldMeta(label='工资', order=14)
+    class MergeHeaderImporter(NoMergeHeaderImporter):
+        max_stay_date: DateRange = FieldMeta(label='最大停留日期', order=19, date_format=DateFormat.YEAR)
+        salary: NumberRange = FieldMeta(label='工资', order=20)
 
     @staticmethod
     async def creator(data: dict[str, Any], context: dict[str, Any] | None) -> dict[str, Any]:
@@ -219,6 +220,12 @@ class TestImport(BaseTestCase):
         company_id = context.get('company_id')
         data['company_id'] = company_id
         return data
+
+    @staticmethod
+    async def is_data_exist(data: dict[str, Any], context: dict[str, Any] | None) -> bool:
+        if context is None:
+            context = {}
+        return random.choices([True, False], weights=[0.5, 0.5])[0]
 
     async def test_simple_import_on_creator(self):
         """Test import excel with no merged header"""
@@ -246,6 +253,37 @@ class TestImport(BaseTestCase):
             import_mode=ImportMode.UPDATE,
         )
         alchemy = ExcelAlchemy(config)
+
+        result = await alchemy.import_data(
+            input_excel_name=FileRegistry.TEST_SIMPLE_IMPORT,
+            output_excel_name='result.xlsx',
+        )
+        assert result is not None
+        assert result.result == ValidateResult.SUCCESS
+        assert result.success_count == 1
+        assert result.url is None
+
+    async def test_simple_import_on_create_or_update(self):
+        """Test import excel with no merged header"""
+        self.assertRaises(
+            ConfigError,
+            ImporterConfig,
+            self.NoMergeHeaderImporter,
+            creator=self.creator,
+            import_mode=ImportMode.CREATE_OR_UPDATE,
+        )
+
+        alchemy = ExcelAlchemy(
+            ImporterConfig(
+                create_importer_model=self.NoMergeHeaderImporter,
+                update_importer_model=self.NoMergeHeaderImporter,
+                is_data_exist=self.is_data_exist,
+                creator=self.creator,
+                updater=self.updater,
+                minio=cast(Minio, self.minio),
+                import_mode=ImportMode.CREATE_OR_UPDATE,
+            )
+        )
 
         result = await alchemy.import_data(
             input_excel_name=FileRegistry.TEST_SIMPLE_IMPORT,
@@ -320,3 +358,46 @@ class TestImport(BaseTestCase):
         assert df is not None
         assert df.shape == (1, 17)
         assert df.iloc[0, 0] == '18'
+
+    async def test_duplicate_order(self):
+        class DuplicateOrderImporter(self.NoMergeHeaderImporter):
+            max_stay_date: DateRange = FieldMeta(label='最大停留日期', order=7, date_format=DateFormat.YEAR)
+            salary: NumberRange = FieldMeta(label='工资', order=14)
+
+        config = ExporterConfig(DuplicateOrderImporter, minio=cast(Minio, self.minio))
+        self.assertRaises(ConfigError, ExcelAlchemy, config)
+
+    async def test_export_with_merged_header(self):
+        config = ExporterConfig(self.MergeHeaderImporter, minio=cast(Minio, self.minio))
+        alchemy = ExcelAlchemy(config)
+        data = [
+            {
+                'age': 18,
+                'name': '张三',
+                'address': '北京市朝阳区',
+                'is_active': True,
+                'birth_date': datetime.datetime.utcnow(),
+                'email': 'norepy@icloud.com',
+                'price': 100.0,
+                'web': 'https://www.baidu.com',
+                'hobby': '篮球',
+                'company': '腾讯',
+                'manager': '马化腾',
+                'department': '技术部',
+                'team': '技术团队',
+                'phone': '13800138000',
+                'radio': '选项1',
+                'boss': '张三',
+                'leader': '李四',
+                'max_stay_date': {'start': '2020-01-01', 'end': '2021-01-02'},
+                'salary': {'start': 1000, 'end': 2000},
+            }
+        ]
+        result = alchemy.export(data)
+        assert result is not None
+
+        df, has_merged_header = alchemy._gen_export_df(data)
+        assert has_merged_header is True
+
+    async def test_import_with_merge_header(self):
+        pass

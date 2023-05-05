@@ -127,8 +127,6 @@ class ExcelAlchemy(
 
     def __init_from_config__(self) -> None:
         """从配置类初始化"""
-        if self.config is None:  # pyright: reportUnnecessaryComparison=false
-            raise RuntimeError('配置类不能为空')
         self.context = getattr(self.config, 'context', None)
         importer_model = self.__get_importer_model__()
         self.__init_field_meta__(importer_model)
@@ -138,14 +136,14 @@ class ExcelAlchemy(
         self.field_metas = extract_pydantic_model(importer_model)
         self._check_field_meta_order(self.field_metas)
         if len(self.field_metas) == 0:
-            raise RuntimeError(f'没有从模型 {importer_model} 中提取到字段元数据，请检查模型是否定义了字段')
+            raise ConfigError(f'没有从模型 {importer_model} 中提取到字段元数据，请检查模型是否定义了字段')
         self.ordered_field_meta: list[FieldMetaInfo] = self._sort_field_meta(self.field_metas)  # type: ignore[no-redef]
 
         for field_meta in self.ordered_field_meta:
             if field_meta.parent_label is None:
-                raise RuntimeError('父标签不能为空')
+                raise ConfigError('父标签不能为空')
             if field_meta.parent_key is None:
-                raise RuntimeError('父键不能为空')
+                raise ConfigError('父键不能为空')
 
             self.parent_label_to_field_metas.setdefault(field_meta.parent_label, []).append(field_meta)
             self.parent_key_to_field_metas.setdefault(field_meta.parent_key, []).append(field_meta)
@@ -161,7 +159,7 @@ class ExcelAlchemy(
             elif self.config.import_mode == ImportMode.UPDATE:
                 importer_model = self.config.update_importer_model  # type: ignore[assignment]
             else:
-                raise RuntimeError('不支持的导入模式')
+                raise ConfigError('不支持的导入模式')
 
         elif self.excel_mode == ExcelMode.EXPORT:
             if not isinstance(self.config, ExporterConfig):
@@ -169,7 +167,7 @@ class ExcelAlchemy(
             importer_model = self.config.exporter_model  # type: ignore[assignment]
 
         else:
-            raise RuntimeError('不支持的模式')
+            raise ConfigError('不支持的模式')
 
         return importer_model  # type: ignore
 
@@ -182,12 +180,12 @@ class ExcelAlchemy(
             order_to_field_meta[field_meta.order].add(field_meta.parent_label)
         duplicate_order = [v for k, v in order_to_field_meta.items() if len(v) > 1 and k != DEFAULT_FIELD_META_ORDER]
         if duplicate_order:
-            raise RuntimeError(f'字段顺序定义有重复：{list(itertools.chain.from_iterable(duplicate_order))}')
+            raise ConfigError(f'字段顺序定义有重复：{list(itertools.chain.from_iterable(duplicate_order))}')
 
     def download_template(self, sample_data: list[dict[str, Any]] | None = None) -> str:
         """下载导入模版"""
         if self.excel_mode != ExcelMode.IMPORT:
-            raise RuntimeError('只支持导入模式调用此方法')
+            raise ConfigError('只支持导入模式调用此方法')
         keys = self._select_output_excel_keys()
         has_merged_header = self.has_merged_header(keys)
         if has_merged_header:
@@ -201,7 +199,7 @@ class ExcelAlchemy(
         """导入数据"""
         assert isinstance(self.config, ImporterConfig)  # only for type check
         if self.excel_mode != ExcelMode.IMPORT:
-            raise RuntimeError('只支持导入模式调用此方法')
+            raise ConfigError('只支持导入模式调用此方法')
 
         validate_header = self._validate_header(input_excel_name)  # 验证表头
         if not validate_header.is_valid:
@@ -257,21 +255,18 @@ class ExcelAlchemy(
     def input_excel_has_merged_header(self) -> bool:
         """用户上传的 Excel 是否有合并的表头"""
         if not self.__state_df_has_been_loaded__:
-            raise RuntimeError('请保证 df 已经初始化')
+            raise ConfigError('请保证 df 已经初始化')
         return self._excel_has_merged_header()
 
     @cached_property
     def input_excel_headers(self) -> list[ExcelHeader]:
         """用户上传的 Excel 表头"""
         if not self.__state_df_has_been_loaded__:
-            raise RuntimeError('请保证 df 已经初始化')
+            raise ConfigError('请保证 df 已经初始化')
         return self._extract_header()
 
     @property
     def excel_mode(self) -> ExcelMode:
-        if self.config is None:
-            raise RuntimeError('请先设置转换模型配置')
-
         if isinstance(self.config, ImporterConfig):
             return ExcelMode.IMPORT
 
@@ -281,7 +276,7 @@ class ExcelAlchemy(
     def extra_header_count_on_import(self) -> int:
         # 执行导入时，预期额外的表头行数, 有合并单元格为 1, 无合并单元格为 0
         if self.excel_mode != ExcelMode.IMPORT:
-            raise RuntimeError('只支持导入模式读取此属性')
+            raise ConfigError('只支持导入模式读取此属性')
         for input_excel_label in self.input_excel_headers:
             if input_excel_label.label != input_excel_label.parent_label:
                 return 1
@@ -289,9 +284,6 @@ class ExcelAlchemy(
 
     @property
     def exporter_model(self) -> Type[ExporterModelT]:
-        if self.config is None:
-            raise RuntimeError('请先设置转换模型配置')
-
         if isinstance(self.config, ImporterConfig):
             if self.config.create_importer_model and self.config.update_importer_model:
                 raise ConfigError('从导入模型推断导出模型失败, 请手动设置导出模型')
@@ -331,7 +323,7 @@ class ExcelAlchemy(
         if self.excel_mode == ExcelMode.IMPORT:
             logging.info('导出模式为导入模式, 调用导出方法时自动切换为导出模式')
 
-        input_keys = keys or [x.unique_key for x in self.ordered_field_meta]
+        input_keys = keys or list(filter(None, [x.parent_key for x in self.ordered_field_meta]))
         model_keys = cast(list[Key], self.exporter_model.__fields__.keys())
         if unrecognized := (set(input_keys) - set(model_keys)):
             logging.warning('导出的列 {%s} 不在模型 {%s} 中', unrecognized, model_keys)
@@ -349,7 +341,7 @@ class ExcelAlchemy(
     def _validate_header(self, input_excel_name: str) -> ValidateHeaderResult:
         """验证表头"""
         if self.excel_mode != ExcelMode.IMPORT:
-            raise RuntimeError('只支持导入模式调用此方法')
+            raise ConfigError('只支持导入模式调用此方法')
         assert isinstance(self.config, ImporterConfig)  # only for type hint, not for runtime
         self._read_dataframe(input_excel_name)
 
@@ -416,7 +408,7 @@ class ExcelAlchemy(
         columns = []
         for header in self.input_excel_headers:
             if header.unique_label not in self.get_output_parent_excel_headers():
-                raise RuntimeError(f'不支持的列名: {header.unique_label}')
+                raise ConfigError(f'不支持的列名: {header.unique_label}')
             columns.append(header.unique_label)
 
         df.columns = columns  # type: ignore[assignment]
@@ -484,18 +476,6 @@ class ExcelAlchemy(
             self.header_df = df.head(2)  # 只读取前两行, 用于解析表头
             self.__state_df_has_been_loaded__ = True
         return self.df
-
-    def _parse_download_data(self, data: list[BaseModel]) -> list[dict[str, Any]]:
-        """解析下载数据"""
-        parsed_data: list[dict[str, Any]] = []
-        for item in data:
-            rst = {}
-            dict_data = flatten(item.dict())
-            for key, value in dict_data.items():
-                field_meta = self.unique_key_to_field_meta[UniqueKey(key)]
-                rst[key] = field_meta.value_type.deserialize(value, field_meta)
-            parsed_data.append(rst)
-        return parsed_data
 
     def _generate_export_df(
         self,
@@ -572,6 +552,7 @@ class ExcelAlchemy(
         if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
 
+        is_success = False
         match self.config.import_mode:
             case ImportMode.CREATE:
                 is_success = await self._creator_caller(row_index, data)
@@ -579,8 +560,6 @@ class ExcelAlchemy(
                 is_success = await self._updater_caller(row_index, data)
             case ImportMode.CREATE_OR_UPDATE:
                 is_success = await self._creator_or_updater_caller(row_index, data)
-            case _:
-                raise ValueError(f'不支持的导入模式: {self.config.import_mode}')
 
         return is_success
 
@@ -589,9 +568,9 @@ class ExcelAlchemy(
         if not isinstance(self.config, ImporterConfig):
             raise TypeError('只有 ExcelImporterConfig 才支持 DML')
         if self.config.creator is None:
-            raise RuntimeError('未配置 creator')
+            raise ConfigError('未配置 creator')
         if self.config.create_importer_model is None:
-            raise RuntimeError('未配置 create_importer_model')
+            raise ConfigError('未配置 create_importer_model')
         return await self.__caller_impl__(
             row_index,
             data,
@@ -606,9 +585,9 @@ class ExcelAlchemy(
         if not isinstance(self.config, ImporterConfig):
             raise TypeError(f'只有 {ImporterConfig.__name__} 才支持 DML')
         if self.config.updater is None:
-            raise RuntimeError('未配置 updater')
+            raise ConfigError('未配置 updater')
         if self.config.update_importer_model is None:
-            raise RuntimeError('未配置 update_importer_model')
+            raise ConfigError('未配置 update_importer_model')
         return await self.__caller_impl__(
             row_index,
             data,
@@ -659,7 +638,7 @@ class ExcelAlchemy(
             raise TypeError(f'只有 {ImporterConfig.__name__} 才支持 DML')
         is_data_exists_func = self.config.is_data_exist
         if is_data_exists_func is None:
-            raise RuntimeError('未配置 is_data_exists')
+            raise ConfigError('未配置 is_data_exists')
 
         converted_data = self.config.data_converter(cast(dict[str, Any], data)) if self.config.data_converter else data
         is_data_exist = await is_data_exists_func(cast(dict[str, Any], converted_data), self.context)
@@ -686,7 +665,7 @@ class ExcelAlchemy(
             field_meta = self.unique_label_to_field_meta[unique_label]
 
             if field_meta.key is None or field_meta.parent_key is None:
-                raise RuntimeError(f' {type(field_meta).__name__} 未配置 key/parent_key')
+                raise ConfigError(f' {type(field_meta).__name__} 未配置 key/parent_key')
 
             if pandas.isna(value):
                 if self.config.import_mode in {  # type: ignore[union-attr]
@@ -802,7 +781,7 @@ class ExcelAlchemy(
         return headers
 
     def __setattr__(self, key: str, value: Any):
-        if key == 'config' and hasattr(self, 'config') and self.config is not None:
+        if key == 'config' and hasattr(self, 'config'):
             raise ValueError(f'{self.__class__.__name__} 已经被实例化, config 不能被修改')
         object.__setattr__(self, key, value)
 

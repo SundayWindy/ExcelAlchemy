@@ -18,3 +18,5 @@ class FileRegistry(str, Enum):
 
     TEST_SIMPLE_IMPORT = 'test_simple_import'
     TEST_SIMPLE_IMPORT_WITH_ERROR = 'test_simple_import_with_error'
+
+    TEST_IMPORT_WITH_MERGE_HEADER = 'test_import_with_merge_header'

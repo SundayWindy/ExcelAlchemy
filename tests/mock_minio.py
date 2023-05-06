@@ -97,6 +97,7 @@ class LocalMockMinio:
                 '网址': 'google',
             }
         ],
+        FileRegistry.TEST_IMPORT_WITH_MERGE_HEADER: './files/test_import_with_merge_header.xlsx',
     }
 
     def __init__(self):

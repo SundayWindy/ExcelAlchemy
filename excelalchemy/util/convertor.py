@@ -14,10 +14,10 @@ def import_data_converter(data: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
     return result
 
 
-def export_data_converter(data: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
+def export_data_converter(data: dict[str, Any], to_camel: bool = False) -> dict[str, Any]:  # noqa: C901
     result: dict[str, Any] = {}
     for k, v in data.items():
-        camel_key = _to_camel_case(k)
+        camel_key = _to_camel_case(k) if to_camel else _to_snake_case(k)
         if camel_key != FIELD_DATA_KEY:
             result[camel_key] = v
             continue

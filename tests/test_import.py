@@ -400,4 +400,14 @@ class TestImport(BaseTestCase):
         assert has_merged_header is True
 
     async def test_import_with_merge_header(self):
-        pass
+        config = ImporterConfig(self.MergeHeaderImporter, creator=self.creator, minio=cast(Minio, self.minio))
+        alchemy = ExcelAlchemy(config)
+
+        result = await alchemy.import_data(
+            input_excel_name=FileRegistry.TEST_IMPORT_WITH_MERGE_HEADER,
+            output_excel_name='result.xlsx',
+        )
+        assert result is not None
+        assert result.result == ValidateResult.SUCCESS
+        assert result.success_count == 1
+        assert result.url is None

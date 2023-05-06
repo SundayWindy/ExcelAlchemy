@@ -36,6 +36,12 @@ class TestUtil(IsolatedAsyncioTestCase):
 
     @classmethod
     def test_export_data_converter(cls):
-        input_data = {'name': 'name', 'address': 'address', 'field_data': {'ID': 'id', 'Name': 'name'}}
-        expected = {'name': 'name', 'address': 'address', 'fieldData.ID': 'id', 'fieldData.Name': 'name'}
+        input_data = {'name': 'name', 'Age': None, 'address': 'address', 'field_data': {'ID': 'id', 'Name': 'name'}}
+        expected = {'address': 'address', 'age': None, 'field_data': {'ID': 'id', 'Name': 'name'}, 'name': 'name'}
         assert export_data_converter(input_data) == expected
+
+    @classmethod
+    def test_export_data_converter_to_camel_case(cls):
+        input_data = {'name': 'name', 'address': 'address', 'field_data': {'ID': 'id', 'Name': 'name'}}
+        expected = {'address': 'address', 'fieldData.ID': 'id', 'fieldData.Name': 'name', 'name': 'name'}
+        assert export_data_converter(input_data, to_camel=True) == expected

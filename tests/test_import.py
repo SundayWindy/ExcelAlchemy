@@ -411,3 +411,40 @@ class TestImport(BaseTestCase):
         assert result.result == ValidateResult.SUCCESS
         assert result.success_count == 1
         assert result.url is None
+
+    async def test_empty_config_model(self):
+        class EmptyCModel(BaseModel):
+            ...
+
+        config = ImporterConfig(EmptyCModel, creator=self.creator, minio=cast(Minio, self.minio))
+        with self.assertRaises(ConfigError) as cm:
+            ExcelAlchemy(config)
+
+        self.assertEqual(str(cm.exception), '没有从模型 EmptyCModel 中提取到字段元数据，请检查模型是否定义了字段')
+
+    async def test_empty_field_meta(self):
+        class EmptyFieldMetaModel(BaseModel):
+            name: str
+
+        config = ImporterConfig(EmptyFieldMetaModel, creator=self.creator, minio=cast(Minio, self.minio))
+        with self.assertRaises(ProgrammaticError) as cm:
+            ExcelAlchemy(config)
+        self.assertEqual(str(cm.exception), '字段定义必须是 FieldMeta 的实例')
+
+    async def test_not_importer_config(self):
+        class NotImporterConfigModel(BaseModel):
+            name: str = FieldMeta(label='姓名')
+
+        with self.assertRaises(ConfigError) as cm:
+            ExcelAlchemy(NotImporterConfigModel)
+
+        self.assertEqual(str(cm.exception), '导出模式的配置类必须是 ExporterConfig')
+
+    async def test_download_template_on_export(self):
+        config = ExporterConfig(self.MergeHeaderImporter, minio=cast(Minio, self.minio))
+        alchemy = ExcelAlchemy(config)
+
+        with self.assertRaises(ConfigError) as cm:
+            alchemy.download_template()
+
+        self.assertEqual(str(cm.exception), '只支持导入模式调用此方法')

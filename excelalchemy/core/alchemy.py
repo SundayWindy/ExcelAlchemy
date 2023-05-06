@@ -136,7 +136,7 @@ class ExcelAlchemy(
         self.field_metas = extract_pydantic_model(importer_model)
         self._check_field_meta_order(self.field_metas)
         if len(self.field_metas) == 0:
-            raise ConfigError(f'没有从模型 {importer_model} 中提取到字段元数据，请检查模型是否定义了字段')
+            raise ConfigError(f'没有从模型 {importer_model.__name__} 中提取到字段元数据，请检查模型是否定义了字段')
         self.ordered_field_meta: list[FieldMetaInfo] = self._sort_field_meta(self.field_metas)  # type: ignore[no-redef]
 
         for field_meta in self.ordered_field_meta:
@@ -151,25 +151,24 @@ class ExcelAlchemy(
             self.unique_label_to_field_meta[field_meta.unique_label] = field_meta
 
     def __get_importer_model__(self) -> type[ImporterCreateModelT] | type[ImporterUpdateModelT] | type[ExporterModelT]:
+        importer_model = None
         if self.excel_mode == ExcelMode.IMPORT:
             if not isinstance(self.config, ImporterConfig):
-                raise TypeError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
+                raise ConfigError(f'导入模式的配置类必须是 {ImporterConfig.__name__}')
             if self.config.import_mode in (ImportMode.CREATE, ImportMode.CREATE_OR_UPDATE):
                 importer_model = self.config.create_importer_model  # type: ignore[assignment]
             elif self.config.import_mode == ImportMode.UPDATE:
                 importer_model = self.config.update_importer_model  # type: ignore[assignment]
-            else:
-                raise ConfigError('不支持的导入模式')
 
         elif self.excel_mode == ExcelMode.EXPORT:
             if not isinstance(self.config, ExporterConfig):
-                raise TypeError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
+                raise ConfigError(f'导出模式的配置类必须是 {ExporterConfig.__name__}')
             importer_model = self.config.exporter_model  # type: ignore[assignment]
 
-        else:
-            raise ConfigError('不支持的模式')
+        if importer_model is None:
+            raise ConfigError('请检查配置类是否定义了导入模型或导出模型')
 
-        return importer_model  # type: ignore
+        return importer_model
 
     @staticmethod
     def _check_field_meta_order(field_metas: list[FieldMetaInfo]) -> None:

@@ -353,7 +353,7 @@ class ExcelAlchemy(
         unrecognized = list(set(input_labels) - set(x.label for x in self.ordered_field_meta))
 
         missing_primary, missing_required = [], []
-        if self.config == ImportMode.UPDATE:
+        if self.config.import_mode == ImportMode.UPDATE:
             missing_primary = list(set(primary_labels) - set(input_labels))
 
         missing_required = list(set(required_labels) - set(input_labels) - set(missing_primary))

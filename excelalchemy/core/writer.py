@@ -95,7 +95,7 @@ def _write_simple_header(
         comment_text = field_meta.value_type.comment(field_meta)
         comment = Comment(
             text=comment_text,
-            author='Teletraan',
+            author='https://github.com/SundayWindy/ExcelAlchemy',
             height=sum(ceil(len(line) / 20) for line in comment_text.splitlines()) * 28,
             width=300,
         )
